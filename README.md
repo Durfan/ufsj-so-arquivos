@@ -25,7 +25,15 @@ O terceiro trabalho prático da disciplina de Sistemas Operacionais consiste na 
 Byte de atributo do arquivo - valor: 0 - arquivo, 1 - diretório
 ```
 
-### Detalhes do shell
+## Instalação e uso
+
+``` bash
+make
+make debug # binario com debug
+make clean # remover binario
+```
+
+### Uso: Detalhes do shell
 
 ``` console
 init                              # inicializar o sistema de arquivos
@@ -38,3 +46,7 @@ write "string"[/caminho/arquivo]  # escrever dados em um arquivo
 append "string"[/caminho/arquivo] # anexar dados em um arquivo
 read [/caminho/arquivo]           # ler o conteúdo de um arquivo
 ```
+
+## Acknowledgments
+
+*   [GenericMakefile](https://github.com/mbcrawfo/GenericMakefile) - versionamento e debug definidos em tempo de compilação.
