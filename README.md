@@ -28,13 +28,13 @@ Byte de atributo do arquivo - valor: 0 - arquivo, 1 - diretório
 ### Detalhes do shell
 
 ``` console
-init # inicializar o sistema de arquivos com as estruturas de dados, semelhante a formatar o sistema de arquivos virtual
-load # carregar o sistema de arquivos do disco
-ls [/caminho/diretorio]    # listar diretório
-mkdir [/caminho/diretorio] # criar diretório
-create [/caminho/arquivo]  # criar arquivo
-unlink [/caminho/arquivo]  # excluir arquivo ou diretório (o diretório precisa estar vazio)
-write "string"[/caminho/arquivo]  # escrever dados em um arquivo (sobrescrever dados)
+init                              # inicializar o sistema de arquivos
+load                              # carregar o sistema de arquivos
+ls [/caminho/diretorio]           # listar diretório
+mkdir [/caminho/diretorio]        # criar diretório
+create [/caminho/arquivo]         # criar arquivo
+unlink [/caminho/arquivo]         # excluir arquivo ou diretório
+write "string"[/caminho/arquivo]  # escrever dados em um arquivo
 append "string"[/caminho/arquivo] # anexar dados em um arquivo
-read [/caminho/arquivo] # ler o conteúdo de um arquivo
+read [/caminho/arquivo]           # ler o conteúdo de um arquivo
 ```
