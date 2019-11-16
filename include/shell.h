@@ -18,15 +18,13 @@
 #define EXIT	6385204799
 
 unsigned long hashcmd(char *cmd);
-int init(void);
-int load(void);
 void shell(void);
 char **tkenizer(char *input);
 int commands(char *cmd);
 void prompt(int status);
-void cmderr(char *cmd);
+int argerr(void);
+int cmderr(char *cmd);
 void shsair(void);
-void help(void);
 
 //#pragma message __FILE__
 #endif // INCLUDE_SHELL_H

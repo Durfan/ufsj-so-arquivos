@@ -8,6 +8,7 @@
 #include <errno.h>
 
 #include "config.h"
+#include "cmds.h"
 #include "shell.h"
 
 //#pragma message __FILE__
