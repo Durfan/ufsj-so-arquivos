@@ -1,29 +1,27 @@
 #include "main.h"
 
 unsigned long hashcmd(char *cmd) {
-	unsigned long hash = 5381;
+	unsigned long hash = 0x1505; // 5381
 	int c;
 	while ((c = *cmd++))
-		hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
-
+		hash = ((hash << 5) + hash) + c; // hash * 33 + c
 	return hash;
 }
 
 void shell(void) {
 	char cmd[MAXCMD];
 	int status = 0;
-
 	do {
-		prompt(status);
 
+		prompt(status);
 		if (fgets(cmd,MAXCMD,stdin) && strcmp(cmd,"\n")) {
 			status = commands(cmd);
 		}
-
+		else
+			status = 0;
 		freebuf(cmd);
 
 	} while (!feof(stdin));
-
 	shsair();
 }
 
@@ -36,7 +34,6 @@ char **tkenizer(char *input) {
 
 	char *parsed;
 	unsigned index = 0;
-
 	parsed = strtok(input," \n");
 	while (parsed != NULL) {
 		command[index] = parsed;
@@ -54,9 +51,8 @@ char **tkenizer(char *input) {
 
 unsigned argcount(char **argv) {
 	unsigned index = 0;
-	while (argv[index] != NULL) {
+	while (argv[index] != NULL)
 		index++;
-	}
 	return index;
 }
 
@@ -118,8 +114,8 @@ int argerr(void) {
 
 int cmderr(char *cmd) {
 	printf("%s: ",program_invocation_short_name);
-	printf("comando nao encontrado: ");
-	printf("%s\n",cmd);
+	printf("comando nao encontrado: %s\n",cmd);
+	puts("digite 'help' para ajuda");
 	return 1;
 }
 
