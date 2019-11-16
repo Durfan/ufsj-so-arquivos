@@ -6,9 +6,11 @@ extern char *program_invocation_short_name;
 #define VERSION "0.0.1"
 #define TAG "alpha"
 
-#define CRED  "\x1b[31m"
-#define CYELL "\x1b[33m"
-#define CRSET "\x1b[0m"
+#define CRED "\x1b[31m"
+#define CYEL "\x1b[33m"
+#define CRST "\x1b[0m"
+#define BOLD "\033[1m"
+#define NORM "\033[22m"
 
 #define SECTOR_SIZE 512
 #define CLUSTERSIZE 2*SECTOR_SIZE

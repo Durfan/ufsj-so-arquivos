@@ -2,7 +2,7 @@
 
 #### PROJECT SETTINGS ####
 # The name of the executable to be created
-BIN_NAME := arquivos
+BIN_NAME := tpfat
 # Compiler used
 CC ?= gcc
 # Extension of source files used in the project

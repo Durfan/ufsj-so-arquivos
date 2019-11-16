@@ -9,7 +9,7 @@ unsigned long hashcmd(char *cmd) {
 	return hash;
 }
 
-void init(void) {
+int init(void) {
 	FILE *fp = fopen(FATNAME,"wb");
 	if (fp == NULL) {
 		perror(program_invocation_short_name);
@@ -36,9 +36,10 @@ void init(void) {
 		fwrite(&g_clusters,sizeof(DataCluster),1,fp);
 
 	fclose(fp);
+	return 0;
 }
 
-void load(void) {
+int load(void) {
 	FILE *fp = fopen(FATNAME,"rb");
 	if (fp == NULL) {
 		perror(program_invocation_short_name);
@@ -48,6 +49,7 @@ void load(void) {
 	fread(g_fat,sizeof(g_fat),1,fp);
 	fread(g_rootdir,sizeof(g_rootdir),1,fp);
 	fclose(fp);
+	return 0;
 }
 
 void shell(void) {
@@ -58,31 +60,73 @@ void shell(void) {
 		prompt(status);
 
 		if (fgets(cmd,MAXCMD,stdin) && strcmp(cmd,"\n")) {
-			tkenizer(cmd);
+			status = commands(cmd);
 		}
 
 		freebuf(cmd);
 
 	} while (!feof(stdin));
 
-	putchar(0x0A);
+	shsair();
 }
 
-void tkenizer(char *cmd) {
-	char *token = strtok(cmd," \n");
-	unsigned long command = hashcmd(token);
+char **tkenizer(char *input) {
+	char **command = malloc(4 * sizeof(char*));
+	if (command == NULL) {
+		perror(program_invocation_short_name);
+		exit(EXIT_FAILURE);
+	}
+
+	char *parsed;
+	unsigned index = 0;
+
+	parsed = strtok(input," \n");
+	while (parsed != NULL) {
+		command[index] = parsed;
+		index++;
+		if (index > 3) {
+			free(command);
+			return NULL;
+		}
+		parsed = strtok(NULL," \n");
+	}
+
+	command[index] = NULL;
+	return command;
+}
+
+unsigned argcount(char **argv) {
+	unsigned index = 0;
+	while (argv[index] != NULL) {
+		index++;
+	}
+	return index;
+}
+
+int commands(char *cmd) {
+	char **argv = tkenizer(cmd);
+	if (argv == NULL) {
+		printf("%s: ", program_invocation_short_name);
+		puts(strerror(E2BIG));
+		return 1;
+	}
+	unsigned argc = argcount(argv);
+	unsigned long hash = hashcmd(argv[0]);
+	int status = 0;
 
 	#ifdef DEBUG
-	printf("cmdhash: %ld\n", command);
+	printf("argv[0]: %s\n", argv[0]);
+	printf("cmdhash: %ld\n", hash);
+	printf("   argc: %d\n", argc);
 	#endif
 
-	switch (command) {
+	switch (hash) {
 	case INIT:
-		init();
+		status = init();
 		break;
 
 	case LOAD:
-		load();
+		status = load();
 		break;
 
 	case HELP:
@@ -95,8 +139,12 @@ void tkenizer(char *cmd) {
 	
 	default:
 		cmderr(cmd);
+		status = 1;
 		break;
 	}
+
+	free(argv);
+	return status;
 }
 
 void help(void) {
@@ -106,15 +154,20 @@ void help(void) {
 	puts("          criar diretorio:  mkdir [/caminho/diretorio]");
 	puts("            criar arquivo: create [/caminho/arquivo]");
 	puts("excluir arquivo/diretorio: unlink [/caminho/arquivo]");
-	puts("      escrever no arquivo:  write [/caminho/arquivo]");
-	puts("        anexar em arquivo: append [/caminho/arquivo]");
+	puts("      escrever no arquivo:  write \"string\" [/caminho/arquivo]");
+	puts("        anexar em arquivo: append \"string\" [/caminho/arquivo]");
 	puts("           ler um arquivo:   read [/caminho/arquivo]");
 	puts("            exibe a ajuda:   help");
 	puts("                     sair:   exit");
 }
 
 void prompt(int status) {
-	printf("> ");
+	printf("%s:"BOLD,program_invocation_short_name);
+	if (status == 1)
+		printf(CRED"$ "CRST);
+	else	
+		printf("$ ");
+	printf(NORM);
 }
 
 void cmderr(char *cmd) {

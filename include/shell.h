@@ -18,10 +18,11 @@
 #define EXIT	6385204799
 
 unsigned long hashcmd(char *cmd);
-void init(void);
-void load(void);
+int init(void);
+int load(void);
 void shell(void);
-void tkenizer(char *cmd);
+char **tkenizer(char *input);
+int commands(char *cmd);
 void prompt(int status);
 void cmderr(char *cmd);
 void shsair(void);
