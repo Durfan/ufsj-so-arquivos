@@ -35,16 +35,18 @@ make clean # remover binario
 
 ### Uso: Detalhes do shell
 
-``` console
-init                              # inicializar o sistema de arquivos
-load                              # carregar o sistema de arquivos
-ls [/caminho/diretorio]           # listar diretório
-mkdir [/caminho/diretorio]        # criar diretório
-create [/caminho/arquivo]         # criar arquivo
-unlink [/caminho/arquivo]         # excluir arquivo ou diretório
-write "string" [/caminho/arquivo]  # escrever dados em um arquivo
-append "string" [/caminho/arquivo] # anexar dados em um arquivo
-read [/caminho/arquivo]           # ler o conteúdo de um arquivo
+``` text
+      inicializar o drive:   init
+         carregar o drive:   load
+         listar diretorio:     ls [/caminho/diretorio]
+          criar diretorio:  mkdir [/caminho/diretorio]
+            criar arquivo: create [/caminho/arquivo]
+excluir arquivo/diretorio: unlink [/caminho/arquivo]
+      escrever no arquivo:  write "string" [/caminho/arquivo]
+        anexar em arquivo: append "string" [/caminho/arquivo]
+           ler um arquivo:   read [/caminho/arquivo]
+            exibe a ajuda:   help
+                     sair:   exit
 ```
 
 ## Acknowledgments
