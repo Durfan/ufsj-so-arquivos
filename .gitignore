@@ -8,6 +8,7 @@
 *.user
 *.userosscache
 *.sln.docstates
+.vscode/
 tpfat
 
 # User-specific files (MonoDevelop/Xamarin Studio)
