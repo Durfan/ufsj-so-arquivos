@@ -51,4 +51,5 @@ excluir arquivo/diretorio: unlink [/caminho/arquivo]
 
 ## Acknowledgments
 
-*   [GenericMakefile](https://github.com/mbcrawfo/GenericMakefile) - versionamento e debug definidos em tempo de compilação.
+* [djb2](http://www.cse.yorku.ca/~oz/hash.html) - Hash Functions
+* [GenericMakefile](https://github.com/mbcrawfo/GenericMakefile) - versionamento e debug definidos em tempo de compilação.
