@@ -51,5 +51,5 @@ excluir arquivo/diretorio: unlink [/caminho/arquivo]
 
 ## Acknowledgments
 
-* [djb2](http://www.cse.yorku.ca/~oz/hash.html) - Hash Functions
+* [djb2](http://www.cse.yorku.ca/~oz/hash.html) - _the magic of number 33 (why it works better than many other constants, prime or not) has never been adequately explained._
 * [GenericMakefile](https://github.com/mbcrawfo/GenericMakefile) - versionamento e debug definidos em tempo de compilação.
