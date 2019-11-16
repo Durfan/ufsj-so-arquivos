@@ -1,4 +1,4 @@
-# Sistemas Operacionais
+# Sistemas Operacionais <img width="100" height="100" src="https://github.com/Durfan/ufsj-so-arquivos/blob/master/docs/logo_ufsj.png" align="right">
 
 ## Trabalho Prático 3
 
