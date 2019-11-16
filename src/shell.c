@@ -77,17 +77,11 @@ int commands(char *cmd) {
 
 	switch (hash) {
 	case INIT:
-		if (argc != 1)
-			status = argerr();
-		else
-			status = init();
+		status = init(argc);
 		break;
 
 	case LOAD:
-		if (argc != 1)
-			status = argerr();
-		else
-			status = load();
+		status = load(argc);
 		break;
 
 	case HELP:

@@ -1,6 +1,11 @@
 #include "main.h"
 
-int init(void) {
+int init(int argc) {
+	if (argc != 1) {
+		argerr();
+		return 1;
+	}
+
 	FILE *fp = fopen(FATNAME,"wb");
 	if (fp == NULL) {
 		perror(program_invocation_short_name);
@@ -30,16 +35,23 @@ int init(void) {
 	return 0;
 }
 
-int load(void) {
+int load(int argc) {
+	if (argc != 1) {
+		argerr();
+		return 1;
+	}
+
 	FILE *fp = fopen(FATNAME,"rb");
 	if (fp == NULL) {
 		perror(program_invocation_short_name);
 		exit(EXIT_FAILURE);
 	}
+
 	fseek(fp,sizeof(g_bootblock),SEEK_SET);
 	fread(g_fat,sizeof(g_fat),1,fp);
 	fread(g_rootdir,sizeof(g_rootdir),1,fp);
 	fclose(fp);
+
 	return 0;
 }
 

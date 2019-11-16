@@ -2,6 +2,12 @@
     "files.associations": {
         "atomic": "c",
         "*.tcc": "c",
-        "string": "c"
+        "string": "c",
+        "vector": "c",
+        "memory": "c",
+        "optional": "c",
+        "string_view": "c",
+        "system_error": "c",
+        "thread": "c"
     }
 }
