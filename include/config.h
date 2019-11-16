@@ -18,12 +18,13 @@ extern char *program_invocation_short_name;
 #define NUMCLUSTER 4096
 #define FATNAME "fat.part"
 
+/* entrada de diretorio, 32 bytes cada */
 typedef struct direntry_t {
-	unsigned char filename[18];
-	unsigned char attributes;
-	unsigned char rserved[7];
-	unsigned short firstblock;
-	unsigned int size;
+	uint8_t  filename[18];
+	uint8_t  attributes;
+	uint8_t  reserved[7];
+	uint16_t firstblock;
+	uint32_t size;
 } DirEntry;
 
 typedef union datacluster_t {
@@ -31,8 +32,9 @@ typedef union datacluster_t {
 	DirEntry data;
 } DataCluster;
 
-unsigned short g_fat[NUMCLUSTER];
-unsigned char g_bootblock[CLUSTERSIZE];
+/* 8 clusters da tabela FAT, 4096 entradas de 16 bits = 8192 bytes*/
+uint16_t g_fat[NUMCLUSTER];
+uint8_t  g_bootblock[CLUSTERSIZE];
 DirEntry g_rootdir[32];
 DataCluster g_clusters[4086];
 

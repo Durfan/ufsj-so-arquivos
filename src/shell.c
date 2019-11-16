@@ -1,7 +1,7 @@
 #include "main.h"
 
-unsigned long hashcmd(char *cmd) {
-	unsigned long hash = 0x1505; // 5381
+uint64_t hashcmd(char *cmd) { // http://www.cse.yorku.ca/~oz/hash.html
+	uint64_t hash = 0x1505; // 5381
 	int c;
 	while ((c = *cmd++))
 		hash = ((hash << 5) + hash) + c; // hash * 33 + c
@@ -61,8 +61,8 @@ int commands(char *cmd) {
 	if (argv == NULL)
 		return argerr();
 
-	unsigned argc = argcount(argv);
-	unsigned long hash = hashcmd(argv[0]);
+	uint16_t argc = argcount(argv);
+	uint64_t hash = hashcmd(argv[0]);
 	int status = 0;
 
 	#ifdef DEBUG

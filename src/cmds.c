@@ -1,6 +1,6 @@
 #include "main.h"
 
-int init(int argc) {
+int init(uint16_t argc) {
 	if (argc != 1) {
 		argerr();
 		return 1;
@@ -35,7 +35,7 @@ int init(int argc) {
 	return 0;
 }
 
-int load(int argc) {
+int load(uint16_t argc) {
 	if (argc != 1) {
 		argerr();
 		return 1;

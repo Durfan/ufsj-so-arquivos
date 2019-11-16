@@ -17,7 +17,7 @@
 #define HELP	6385292014
 #define EXIT	6385204799
 
-unsigned long hashcmd(char *cmd);
+uint64_t hashcmd(char *cmd);
 void shell(void);
 char **tkenizer(char *input);
 int commands(char *cmd);
