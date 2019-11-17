@@ -32,7 +32,7 @@ typedef struct direntry_t {
 	ou bloco de dados de 1024 bytes */
 typedef union datacluster_t {
 	DirEntry dir[CLUSTERSIZE / sizeof(DirEntry)];
-	DirEntry data;
+	uint8_t data[CLUSTERSIZE];
 } DataCluster;
 
 /* 8 clusters da tabela FAT, 4096 entradas de 16 bits = 8192 bytes */

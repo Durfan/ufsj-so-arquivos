@@ -80,6 +80,14 @@ int commands(char *cmd) {
 		status = load(argc);
 		break;
 
+	case LS:
+		status = ls(argc,argv);
+		break;
+
+	case MKDIR:
+		status = mkdir(argc,argv);
+		break;
+
 	case HELP:
 		help();
 		break;
