@@ -3,7 +3,7 @@
 
 extern char *program_invocation_name;
 extern char *program_invocation_short_name;
-#define VERSION "0.0.1"
+#define VERSION "0.0.2"
 #define TAG "alpha"
 
 #define CRED "\x1b[31m"
