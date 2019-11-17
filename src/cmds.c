@@ -55,6 +55,30 @@ int load(uint16_t argc) {
 	return 0;
 }
 
+int ls(void) {
+	
+}
+
+int create(void) {
+
+}
+
+int unlink(void) {
+	
+}
+
+int write(void) {
+	
+}
+
+int append(void) {
+	
+}
+
+int read(void) {
+	
+}
+
 void help(void) {
 	puts("      inicializar o drive:   init");
 	puts("         carregar o drive:   load");
