@@ -19,12 +19,14 @@
 
 uint64_t hashcmd(char *cmd);
 void shell(void);
-char **tkenizer(char *input);
+char **tkenizer(char *input, char *delim);
 int commands(char *cmd);
 void prompt(int status);
 int argerr(void);
 int cmderr(char *cmd);
 void shsair(void);
+
+void dbugtkn(char **tokens);
 
 //#pragma message __FILE__
 #endif // INCLUDE_SHELL_H

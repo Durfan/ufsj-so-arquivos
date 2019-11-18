@@ -12,9 +12,5 @@ int append(void);
 int read(void);
 void help(void);
 
-DataCluster *readCL(int index);
-void writeCL(int index, DataCluster *cluster);
-int findSpace(void);
-
 //#pragma message __FILE__
 #endif // INCLUDE_CMDS_H

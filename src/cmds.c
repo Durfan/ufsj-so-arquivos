@@ -70,27 +70,56 @@ int mkdir(uint16_t argc, char **argv) {
 		return 1;
 	}
 
+	DataCluster *block = readCL(9);
+	DirEntry new;
+
+	// tendo o diretorio no qual queremos criar o novo (token)
+	// basta verificar se nao existe um arquivo com este mesmo nome
+	// verificar se possui um bloco livre no diretório e na fat
+	for (long unsigned i=0; i < ENTRYBYCLUSTER; i++) {
+
+		if (block->dir[i].firstblock == 0) {
+			
+			int index_fat = findSpace();
+			g_fat[index_fat] = 0xffff;
+			memcpy(new.filename,argv[1],sizeof(char)*strlen(argv[1]));
+			new.attributes = 1;
+			new.firstblock = index_fat;
+			new.size = 0;
+
+			block->dir[i] = new;
+			writeCL(9,block);
+			writeFAT();
+			break;
+		}
+	}
+
 	return 0;
 }
 
 int create(void) {
 
+	return 0;
 }
 
 int unlink(void) {
-	
+
+	return 0;
 }
 
 int write(void) {
-	
+
+	return 0;
 }
 
 int append(void) {
-	
+
+	return 0;
 }
 
 int read(void) {
-	
+
+	return 0;
 }
 
 void help(void) {
@@ -105,38 +134,4 @@ void help(void) {
 	puts("           ler um arquivo:   read [/caminho/arquivo]");
 	puts("            exibe a ajuda:   help");
 	puts("                     sair:   exit");
-}
-
-DataCluster *readCL(int index) {
-	FILE *fp = fopen(FATNAME,"rb");
-	if (fp == NULL) {
-		perror(program_invocation_short_name);
-		return NULL;
-	}
-
-	DataCluster *cluster;
-	fseek(fp,(CLUSTERSIZE*index),SEEK_SET);
-	fread(cluster,sizeof(DataCluster),1,fp);
-
-	fclose(fp);
-	return cluster;
-}
-
-void writeCL(int index, DataCluster *cluster) {
-	FILE *fp = fopen(FATNAME,"rb+");
-	if (fp == NULL)
-		exit(EXIT_FAILURE);
-
-	fseek(fp,(CLUSTERSIZE*index), SEEK_SET);
-	fwrite(cluster,CLUSTERSIZE,1,fp);
-
-	fclose(fp);
-}
-
-int findSpace(void) {
-	int i = 0;
-	while (g_fat[i] != 0 && i < NUMCLUSTER) i++;
-	if (i == NUMCLUSTER)
-		return -1;
-	return i;
 }

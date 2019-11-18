@@ -9,6 +9,7 @@
 #include <errno.h>
 
 #include "config.h"
+#include "fat.h"
 #include "cmds.h"
 #include "shell.h"
 

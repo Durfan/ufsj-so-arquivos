@@ -25,28 +25,29 @@ void shell(void) {
 	shsair();
 }
 
-char **tkenizer(char *input) {
-	char **command = malloc(4 * sizeof(char*));
-	if (command == NULL) {
+char **tkenizer(char *input, char *delim) {
+	char **tokens = malloc(32 * sizeof(char*));
+	if (tokens == NULL) {
 		perror(program_invocation_short_name);
 		exit(EXIT_FAILURE);
 	}
 
 	char *parsed;
 	unsigned index = 0;
-	parsed = strtok(input," \n");
+	parsed = strtok(input,delim);
 	while (parsed != NULL) {
-		command[index] = parsed;
+		tokens[index] = parsed;
 		index++;
-		if (index > 3) {
-			free(command);
-			return NULL;
-		}
-		parsed = strtok(NULL," \n");
+		parsed = strtok(NULL,delim);
 	}
 
-	command[index] = NULL;
-	return command;
+	tokens[index] = NULL;
+
+	#ifdef DEBUG
+	dbugtkn(tokens);
+	#endif
+
+	return tokens;
 }
 
 unsigned argcount(char **argv) {
@@ -57,7 +58,8 @@ unsigned argcount(char **argv) {
 }
 
 int commands(char *cmd) {
-	char **argv = tkenizer(cmd);
+	char *delim = " \n";
+	char **argv = tkenizer(cmd,delim);
 	if (argv == NULL)
 		return argerr();
 
@@ -116,7 +118,7 @@ void prompt(int status) {
 
 int argerr(void) {
 	printf("%s: ", program_invocation_short_name);
-	puts(strerror(E2BIG));
+	puts(strerror(EINVAL));
 	return 1;
 }
 
@@ -129,4 +131,12 @@ int cmderr(char *cmd) {
 
 void shsair(void) {
 	puts("Saindo...");
+}
+
+void dbugtkn(char **tokens) {
+	int i = 0;
+	while (tokens[i] != NULL) {
+		printf("tokens[%d] = %s\n",i,tokens[i]);
+		i++;
+	}
 }
