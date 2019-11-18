@@ -65,9 +65,6 @@ int mkdir(uint16_t argc, char **argv) {
 	DataCluster *block = readCL(9);
 	DirEntry new;
 
-	// tendo o diretorio no qual queremos criar o novo (token)
-	// basta verificar se nao existe um arquivo com este mesmo nome
-	// verificar se possui um bloco livre no diretório e na fat
 	for (long unsigned i=0; i < ENTRYBYCLUSTER; i++) {
 
 		if (block->dir[i].firstblock == 0) {
