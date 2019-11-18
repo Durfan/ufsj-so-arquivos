@@ -1,10 +1,8 @@
 #include "main.h"
 
 int init(uint16_t argc) {
-	if (argc != 1) {
-		argerr();
+	if (argerr(argc,1))
 		return 1;
-	}
 
 	FILE *fp = fopen(FATNAME,"wb");
 	if (fp == NULL) {
@@ -36,10 +34,8 @@ int init(uint16_t argc) {
 }
 
 int load(uint16_t argc) {
-	if (argc != 1) {
-		argerr();
+	if (argerr(argc,1))
 		return 1;
-	}
 
 	FILE *fp = fopen(FATNAME,"rb");
 	if (fp == NULL) {
@@ -56,19 +52,15 @@ int load(uint16_t argc) {
 }
 
 int ls(uint16_t argc, char **argv) {
-	if (argc != 2) {
-		argerr();
+	if (argerr(argc,2))
 		return 1;
-	}
 
 	return 0;
 }
 
 int mkdir(uint16_t argc, char **argv) {
-	if (argc != 2) {
-		argerr();
+	if (argerr(argc,2))
 		return 1;
-	}
 
 	DataCluster *block = readCL(9);
 	DirEntry new;

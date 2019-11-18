@@ -17,16 +17,18 @@
 #define HELP	6385292014
 #define EXIT	6385204799
 
-uint64_t hashcmd(char *cmd);
+uint64_t hashcmd(char *str);
 void shell(void);
+
 char **tkenizer(char *input, char *delim);
 int commands(char *cmd);
-void prompt(int status);
-int argerr(void);
-int cmderr(char *cmd);
-void shsair(void);
+void  prompt(int status);
+int   argerr(int argv, int args);
+int   cmderr(char *cmd);
+void  shsair(void);
 
-void dbugtkn(char **tokens);
+void dbgtokn(char **tokens);
+void dbgargv(uint64_t hash, uint16_t argc, char **argv);
 
 //#pragma message __FILE__
 #endif // INCLUDE_SHELL_H

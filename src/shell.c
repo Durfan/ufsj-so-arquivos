@@ -1,10 +1,12 @@
 #include "main.h"
 
-uint64_t hashcmd(char *cmd) { // http://www.cse.yorku.ca/~oz/hash.html
+// djb2 http://www.cse.yorku.ca/~oz/hash.html
+uint64_t hashcmd(char *str) {
 	uint64_t hash = 0x1505; // 5381
 	int c;
-	while ((c = *cmd++))
-		hash = ((hash << 5) + hash) + c; // hash * 33 + c
+	while ((c = *str++))
+		hash = ((hash << 5) + hash) + c;
+		// hash * 33 + c (Magic number)
 	return hash;
 }
 
@@ -44,7 +46,7 @@ char **tkenizer(char *input, char *delim) {
 	tokens[index] = NULL;
 
 	#ifdef DEBUG
-	dbugtkn(tokens);
+	dbgtokn(tokens);
 	#endif
 
 	return tokens;
@@ -60,17 +62,13 @@ unsigned argcount(char **argv) {
 int commands(char *cmd) {
 	char *delim = " \n";
 	char **argv = tkenizer(cmd,delim);
-	if (argv == NULL)
-		return argerr();
 
 	uint16_t argc = argcount(argv);
 	uint64_t hash = hashcmd(argv[0]);
 	int status = 0;
 
 	#ifdef DEBUG
-	printf("argv[0]: %s\n", argv[0]);
-	printf("cmdhash: %ld\n", hash);
-	printf("   argc: %d\n", argc);
+	dbgargv(hash,argc,argv);
 	#endif
 
 	switch (hash) {
@@ -116,10 +114,13 @@ void prompt(int status) {
 	printf(NORM);
 }
 
-int argerr(void) {
-	printf("%s: ", program_invocation_short_name);
-	puts(strerror(EINVAL));
-	return 1;
+int argerr(int argv, int args) {
+	if (argv != args) {
+		printf("%s: ",program_invocation_short_name);
+		puts(strerror(EINVAL));
+		return 1;
+	}
+	return 0;
 }
 
 int cmderr(char *cmd) {
@@ -133,10 +134,20 @@ void shsair(void) {
 	puts("Saindo...");
 }
 
-void dbugtkn(char **tokens) {
+void dbgtokn(char **tokens) {
 	int i = 0;
+	printf(CYEL);
 	while (tokens[i] != NULL) {
 		printf("tokens[%d] = %s\n",i,tokens[i]);
 		i++;
 	}
+	printf(CRST);
+}
+
+void dbgargv(uint64_t hash, uint16_t argc, char **argv) {
+	printf(CYEL);
+	printf("  argv[0]-> %s\n", argv[0]);
+	printf("  cmdhash-> %ld\n",hash);
+	printf("     argc-> %d\n", argc);
+	printf(CRST);
 }
