@@ -72,33 +72,18 @@ int commands(char *cmd) {
 	#endif
 
 	switch (hash) {
-	case INIT:
-		status = init(argc);
-		break;
-
-	case LOAD:
-		status = load(argc);
-		break;
-
-	case LS:
-		status = ls(argc,argv);
-		break;
-
-	case MKDIR:
-		status = mkdir(argc,argv);
-		break;
-
-	case HELP:
-		help();
-		break;
-
-	case EXIT:
-		shsair();
-		exit(EXIT_SUCCESS);
-	
-	default:
-		status = cmderr(cmd);
-		break;
+	case INIT:   status =   init(argc);      break;
+	case LOAD:   status =   load(argc);      break;
+	case LS:     status =     ls(argc,argv); break;
+	case MKDIR:  status =  mkdir(argc,argv); break;
+	case CREATE: status = create(argc,argv); break;
+	case UNLINK: status = unlink(argc,argv); break;
+	case WRITE:  status =  write(argc,argv); break;
+	case APPEND: status = append(argc,argv); break;
+	case READ:   status =   read(argc,argv); break;
+	case HELP:   help();                     break;
+	case EXIT:   shsair();                   exit(EXIT_SUCCESS);
+	default:     status = cmderr(cmd);       break;
 	}
 
 	free(argv);
@@ -114,18 +99,20 @@ void prompt(int status) {
 	printf(NORM);
 }
 
-int argerr(int argv, int args) {
-	if (argv != args) {
-		printf("%s: ",program_invocation_short_name);
-		puts(strerror(EINVAL));
+int argerr(int argc, int args) {
+	char *app = program_invocation_short_name;
+	char *err = strerror(EINVAL);
+	if (argc != args) {
+		fprintf(stderr,"%s: %s\n",app,err);
 		return 1;
 	}
 	return 0;
 }
 
 int cmderr(char *cmd) {
-	printf("%s: ",program_invocation_short_name);
-	printf("comando nao encontrado: %s\n",cmd);
+	char *app = program_invocation_short_name;
+	char *err = "comando nao encontrado";
+	fprintf(stderr,"%s: %s: %s\n",app,err,cmd);
 	puts("digite 'help' para ajuda");
 	return 1;
 }

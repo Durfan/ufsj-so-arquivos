@@ -86,27 +86,27 @@ int mkdir(uint16_t argc, char **argv) {
 	return 0;
 }
 
-int create(void) {
+int create(uint16_t argc, char **argv) {
 
 	return 0;
 }
 
-int unlink(void) {
+int unlink(uint16_t argc, char **argv) {
 
 	return 0;
 }
 
-int write(void) {
+int write(uint16_t argc, char **argv) {
 
 	return 0;
 }
 
-int append(void) {
+int append(uint16_t argc, char **argv) {
 
 	return 0;
 }
 
-int read(void) {
+int read(uint16_t argc, char **argv) {
 
 	return 0;
 }

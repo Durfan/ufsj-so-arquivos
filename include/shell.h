@@ -23,7 +23,7 @@ void shell(void);
 char **tkenizer(char *input, char *delim);
 int commands(char *cmd);
 void  prompt(int status);
-int   argerr(int argv, int args);
+int   argerr(int argc, int args);
 int   cmderr(char *cmd);
 void  shsair(void);
 
