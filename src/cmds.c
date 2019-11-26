@@ -51,41 +51,41 @@ int load(uint16_t argc) {
 	return 0;
 }
 
+/*
 int ls(uint16_t argc, char **argv) {
 	if (argerr(argc,2))
 		return 1;
 
 	return 0;
 }
+*/
 
 int mkdir(uint16_t argc, char **argv) {
 	if (argerr(argc,2))
 		return 1;
 
-	DataCluster *block = readCL(9);
-	DirEntry new;
+	char *delim = "/";
+	char **path = tkenizer(argv[1],delim);
 
-	for (long unsigned i=0; i < ENTRYBYCLUSTER; i++) {
+	DataCluster *root = readCL(9);
+	DirEntry folder;
 
-		if (block->dir[i].firstblock == 0) {
-			
-			int index_fat = findSpace();
-			g_fat[index_fat] = 0xffff;
-			memcpy(new.filename,argv[1],sizeof(char)*strlen(argv[1]));
-			new.attributes = 1;
-			new.firstblock = index_fat;
-			new.size = 0;
+	//memcpy(folder.filename,path[0],17*sizeof(char));
 
-			block->dir[i] = new;
-			writeCL(9,block);
-			writeFAT();
-			break;
+/* 	for (long unsigned i=0; i < ENTRYBYCLUSTER; i++) {
+		if (root->dir[i].firstblock == 0) {
+			strncpy((char*)folder.filename,path[0],17);
+			folder.attributes = 1;
+			root->dir[i] = folder;
 		}
-	}
+	} */
+
+	free(path);
 
 	return 0;
 }
 
+/*
 int create(uint16_t argc, char **argv) {
 
 	return 0;
@@ -110,6 +110,7 @@ int read(uint16_t argc, char **argv) {
 
 	return 0;
 }
+*/
 
 void help(void) {
 	puts("      inicializar o drive:   init");

@@ -1,7 +1,7 @@
 #ifndef INCLUDE_SHELL_H
 #define INCLUDE_SHELL_H
 
-#define MAXCMD 64
+#define MAXCMD 4096
 #define freebuf(buff) \
 	memset(buff,'\0',MAXCMD * sizeof(char));
 

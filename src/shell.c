@@ -74,15 +74,15 @@ int commands(char *cmd) {
 	switch (hash) {
 	case INIT:   status =   init(argc);      break;
 	case LOAD:   status =   load(argc);      break;
-	case LS:     status =     ls(argc,argv); break;
+	//case LS:     status =     ls(argc,argv); break;
 	case MKDIR:  status =  mkdir(argc,argv); break;
-	case CREATE: status = create(argc,argv); break;
-	case UNLINK: status = unlink(argc,argv); break;
-	case WRITE:  status =  write(argc,argv); break;
-	case APPEND: status = append(argc,argv); break;
-	case READ:   status =   read(argc,argv); break;
+	//case CREATE: status = create(argc,argv); break;
+	//case UNLINK: status = unlink(argc,argv); break;
+	//case WRITE:  status =  write(argc,argv); break;
+	//case APPEND: status = append(argc,argv); break;
+	//case READ:   status =   read(argc,argv); break;
 	case HELP:   help();                     break;
-	case EXIT:   shsair();                   exit(EXIT_SUCCESS);
+	case EXIT:   free(argv); shsair();       exit(EXIT_SUCCESS);
 	default:     status = cmderr(cmd);       break;
 	}
 
