@@ -24,6 +24,8 @@ int init(uint16_t argc) {
 		g_fat[i] = 0x0000;
 
 	fwrite(&g_fat,sizeof(g_fat),1,fp);
+
+	memset(g_rootdir,0x00,sizeof(g_rootdir));
 	fwrite(&g_rootdir,sizeof(g_rootdir),1,fp);
 
 	for (int i=0; i < 4086; ++i)
@@ -67,18 +69,23 @@ int mkdir(uint16_t argc, char **argv) {
 	char *delim = "/";
 	char **path = tkenizer(argv[1],delim);
 
-	DataCluster *root = readCL(9);
+	DataCluster root = readCL(9);
 	DirEntry folder;
+	memset(folder.filename,'\0',18*sizeof(char));
+	memset(folder.reserved,0,7*sizeof(char));
+	strncpy((char*)folder.filename,path[0],17*sizeof(char));
+	folder.attributes = 1;
+	folder.firstblock = 0;
+	folder.size = 0;
 
-	//memcpy(folder.filename,path[0],17*sizeof(char));
-
-/* 	for (long unsigned i=0; i < ENTRYBYCLUSTER; i++) {
-		if (root->dir[i].firstblock == 0) {
-			strncpy((char*)folder.filename,path[0],17);
-			folder.attributes = 1;
-			root->dir[i] = folder;
+	for (long unsigned i=0; i < ENTRYBYCLUSTER; i++) {
+		if (root.dir[i].firstblock == 0) {
+			root.dir[i] = folder;
+			break;
 		}
-	} */
+	}
+
+	writeCL(9,root);
 
 	free(path);
 
