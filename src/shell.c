@@ -74,7 +74,7 @@ int commands(char *cmd) {
 	switch (hash) {
 	case INIT:   status =   init(argc);      break;
 	case LOAD:   status =   load(argc);      break;
-	//case LS:     status =     ls(argc,argv); break;
+	case LS:     status =     ls(argc,argv); break;
 	case MKDIR:  status =  mkdir(argc,argv); break;
 	//case CREATE: status = create(argc,argv); break;
 	//case UNLINK: status = unlink(argc,argv); break;

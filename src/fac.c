@@ -1,27 +1,27 @@
 #include "main.h"
 
-DataCluster *readCL(int index) {
+DataCluster readCL(int index) {
 	FILE *fp = fopen(FATNAME,"rb");
 	if (fp == NULL) {
 		perror(program_invocation_short_name);
-		return NULL;
+		exit(EXIT_FAILURE);
 	}
 
-	DataCluster *cluster;
+	DataCluster cluster;
 	fseek(fp,(CLUSTERSIZE*index),SEEK_SET);
-	fread(cluster,sizeof(DataCluster),1,fp);
+	fread(&cluster,sizeof(DataCluster),1,fp);
 
 	fclose(fp);
 	return cluster;
 }
 
-void writeCL(int index, DataCluster *cluster) {
+void writeCL(int index, DataCluster cluster) {
 	FILE *fp = fopen(FATNAME,"rb+");
 	if (fp == NULL)
 		exit(EXIT_FAILURE);
 
 	fseek(fp,(CLUSTERSIZE*index), SEEK_SET);
-	fwrite(cluster,CLUSTERSIZE,1,fp);
+	fwrite(&cluster,CLUSTERSIZE,1,fp);
 
 	fclose(fp);
 }

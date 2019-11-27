@@ -31,8 +31,8 @@ uint8_t  g_bootblock[CLUSTERSIZE];
 DirEntry g_rootdir[32];
 DataCluster g_clusters[4086];
 
-DataCluster *readCL(int index);
-void  writeCL(int index, DataCluster *cluster);
+DataCluster readCL(int index);
+void  writeCL(int index, DataCluster cluster);
 void writeFAT(void);
 int findSpace(void);
 
