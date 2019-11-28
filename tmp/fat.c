@@ -68,3 +68,8 @@ void load(void) {
 	fread(root_dir, sizeof(root_dir), 1, ptr_file);
 	fclose(ptr_file);
 }
+
+int main(void) {
+	init();
+	return 0;
+}
