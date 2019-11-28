@@ -71,6 +71,8 @@ int commands(char *cmd) {
 	dbgargv(hash,argc,argv);
 	#endif
 
+	printf("teste: %d\n", findSpace());
+
 	switch (hash) {
 	case INIT:   status =   init(argc);      break;
 	case LOAD:   status =   load(argc);      break;

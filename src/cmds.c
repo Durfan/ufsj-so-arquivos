@@ -74,7 +74,7 @@ int mkdir(uint16_t argc, char **argv) {
 	folder.firstblock = 0;
 	folder.size = 0;
 
-	for (long unsigned i=0; i < ENTRYBYCLUSTER; i++) {
+	for (int i=0; i < ENTRYBYCLUSTER; i++) {
 		if (root.dir[i].firstblock == 0) {
 			root.dir[i] = folder;
 			break;
