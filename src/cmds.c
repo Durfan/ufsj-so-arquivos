@@ -14,13 +14,14 @@ int init(uint16_t argc) {
 	fwrite(&g_bootblock,sizeof(g_bootblock),1,fp);
 
 	g_fat[0] = 0xFFFD;
-
-	for (int i=1; i < NUMCLUSTER; ++i)
+	for (int i=1; i < 9; ++i)
 		g_fat[i] = 0xFFFE;
-
+	g_fat[9] = 0xFFFF;
+	for (int i=10; i < NUMCLUSTERS; ++i)
+		g_fat[i] = 0x0000;
 	fwrite(&g_fat,sizeof(g_fat),1,fp);
 
-	memset(g_rootdir,0xFF,sizeof(g_rootdir));
+	memset(g_rootdir,0x00,sizeof(g_rootdir));
 	fwrite(&g_rootdir,sizeof(g_rootdir),1,fp);
 
 	for (int i=0; i < 4086; ++i)

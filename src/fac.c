@@ -8,7 +8,7 @@ DataCluster readCL(int index) {
 	}
 
 	DataCluster cluster;
-	fseek(fp,(CLUSTERSIZE*index),SEEK_SET);
+	fseek(fp,(CLUSTER*index),SEEK_SET);
 	fread(&cluster,sizeof(DataCluster),1,fp);
 
 	fclose(fp);
@@ -20,8 +20,8 @@ void writeCL(int index, DataCluster cluster) {
 	if (fp == NULL)
 		exit(EXIT_FAILURE);
 
-	fseek(fp,(CLUSTERSIZE*index), SEEK_SET);
-	fwrite(&cluster,CLUSTERSIZE,1,fp);
+	fseek(fp,(CLUSTER*index), SEEK_SET);
+	fwrite(&cluster,CLUSTER,1,fp);
 
 	fclose(fp);
 }
@@ -31,16 +31,16 @@ void writeFAT(void) {
 	if (fp == NULL)
 		exit(EXIT_FAILURE);
 
-	fseek(fp,CLUSTERSIZE,SEEK_SET);
-	fwrite(&g_fat,NUMCLUSTER,1,fp);
+	fseek(fp,CLUSTER,SEEK_SET);
+	fwrite(&g_fat,NUMCLUSTERS,1,fp);
 
 	fclose(fp);
 }
 
 int findSpace(void) {
 	int i = 0;
-	while (g_fat[i] != 0 && i < NUMCLUSTER) i++;
-	if (i == NUMCLUSTER)
+	while (g_fat[i] != 0 && i < NUMCLUSTERS) i++;
+	if (i == NUMCLUSTERS)
 		return -1;
 	return i;
 }

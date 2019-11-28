@@ -1,10 +1,10 @@
 #ifndef INCLUDE_FAT_H
 #define INCLUDE_FAT_H
 
-#define SECTORSIZE  512
-#define CLUSTERSIZE 2*SECTORSIZE
-#define ENTRYBYCLUSTER CLUSTERSIZE/sizeof(DirEntry)
-#define NUMCLUSTER  4096
+#define SECTORS 512
+#define CLUSTER 2*SECTORS
+#define ENTRYBYCLUSTER CLUSTER/sizeof(DirEntry)
+#define NUMCLUSTERS 4096
 #define FATNAME "fat.part"
 
 /* entrada de diretorio, 32 bytes cada */
@@ -16,18 +16,16 @@ typedef struct direntry_t {
 	uint32_t size;			//  4 bytes
 } DirEntry;
 
-/*	diretorios (incluindo ROOT),
-	32 entradas de diretorio com 32 bytes cada = 1024 bytes
-	ou bloco de dados de 1024 bytes */
+/* diretorios (incluindo ROOT),
+   32 entradas de diretorio com 32 bytes cada = 1024 bytes
+   ou bloco de dados de 1024 bytes */
 typedef union datacluster_t {
-	DirEntry dir[CLUSTERSIZE / sizeof(DirEntry)];
-	uint8_t data[CLUSTERSIZE];
+	DirEntry dir[CLUSTER / sizeof(DirEntry)];
+	uint8_t data[CLUSTER];
 } DataCluster;
 
-/* 8 clusters da tabela FAT, 4096 entradas de 16 bits = 8192 bytes */
-uint16_t g_fat[NUMCLUSTER];
-
-uint8_t  g_bootblock[CLUSTERSIZE];
+uint16_t g_fat[NUMCLUSTERS]; // 8 clusters da tabela FAT, 4096 entradas de 16 bits = 8192 bytes
+uint8_t  g_bootblock[CLUSTER];
 DirEntry g_rootdir[32];
 DataCluster g_clusters[4086];
 
