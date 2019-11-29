@@ -12,6 +12,8 @@ int append(uint16_t argc, char **argv);
 int   read(uint16_t argc, char **argv);
 void  help(void);
 
+DataCluster crtdir(DataCluster cluster, DirEntry folder);
+int exists(DataCluster cluster, char *path);
 DirEntry newdir(char *filename);
 
 //#pragma message __FILE__
