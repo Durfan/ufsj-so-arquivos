@@ -66,26 +66,32 @@ int mkdir(uint16_t argc, char **argv) {
 	char **path = tkenizer(argv[1],delim);
 
 	DataCluster root = readCL(9);
-	DirEntry folder;
-	memset(folder.filename,'\0',18*sizeof(char));
-	memset(folder.reserved,0,7*sizeof(char));
-	strncpy((char*)folder.filename,path[0],17*sizeof(char));
-	folder.attributes = 1;
-	folder.firstblock = 0;
-	folder.size = 0;
+	DirEntry folder = newdir(path[0]);
 
-	for (int i=0; i < ENTRYBYCLUSTER; i++) {
-		if (root.dir[i].firstblock == 0) {
+	for (long unsigned i=0; i < ENTRYBYCLUSTER; i++) {
+		if (root.dir[i].filename[0] == 0) {
 			root.dir[i] = folder;
 			break;
 		}
 	}
 
 	writeCL(9,root);
-
+	writeFAT();
 	free(path);
 
 	return 0;
+}
+
+DirEntry newdir(char *filename) {
+	DirEntry folder;
+	memset(folder.filename,'\0',18*sizeof(char));
+	memset(folder.reserved,0,7*sizeof(char));
+	strncpy((char*)folder.filename,filename,17*sizeof(char));
+	folder.attributes = 1;
+	folder.firstblock = findSpace();
+	g_fat[folder.firstblock] = 0xFFFF;
+	folder.size = 0x400;
+	return folder;
 }
 
 /*

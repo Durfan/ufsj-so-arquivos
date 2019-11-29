@@ -42,19 +42,9 @@ void writeFAT(void) {
 }
 
 int findSpace(void) {
-	FILE *fp = fopen(FATNAME,"rb");
-	if (fp == NULL) {
-		perror(program_invocation_short_name);
-		exit(EXIT_FAILURE);
-	}
-	fseek(fp,CLUSTER,SEEK_SET);
-	uint16_t ptr;
-	int index = -1;
-	for (int i=0; i < NUMCLUSTERS; ++i) {
-		fread(&ptr,sizeof(ptr),1,fp);
-		if (ptr == 0x0000 && index == -1)
-			index = i;
-	}
-	fclose(fp);
-	return index;
+	int i = 0;
+	while (g_fat[i] != 0x0000 && i < NUMCLUSTERS) i++;
+	if (i == NUMCLUSTERS)
+		return -1;
+	return i;
 }

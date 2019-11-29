@@ -12,5 +12,7 @@ int append(uint16_t argc, char **argv);
 int   read(uint16_t argc, char **argv);
 void  help(void);
 
+DirEntry newdir(char *filename);
+
 //#pragma message __FILE__
 #endif // INCLUDE_CMDS_H
