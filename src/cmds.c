@@ -49,14 +49,57 @@ int load(uint16_t argc) {
 	return 0;
 }
 
-/*
+
 int ls(uint16_t argc, char **argv) {
 	if (argerr(argc,2))
 		return 1;
 
+	char *argv1 = strdup(argv[1]);
+	char *delim = "/";
+	char **path = tkenizer(argv[1],delim);
+	
+
+	DataCluster cluster = readCL(9);
+	bool list = true;
+
+	int i=0, exists, block = 9;
+	while (path[i] != NULL) {
+		cluster = readCL(block);
+		exists  = dirSET(cluster,path[i]);
+		if (exists < 0) {
+			fprintf(stderr,"%s\n",strerror(ENOENT));
+			list = false;
+			break;
+		}
+		else
+			block = exists;
+		i++;
+	}
+
+	if (list) {
+		int space = 0;
+		cluster = readCL(block);
+		printf("\u250C 0x%04X %s\n", block, argv1);
+		for (int i=0; i < 32; i++) {
+			if (cluster.dir[i].filename[0] != 0x0000) {
+				space++;
+				printf("\u251C 0x%04X ", cluster.dir[i].firstblock);
+				printf("%dB : ", cluster.dir[i].size);
+				if (cluster.dir[i].attributes == 1)
+					printf(BOLD"%s"NORM, cluster.dir[i].filename);
+				else 
+					printf("%s", cluster.dir[i].filename);
+				putchar(0x0A);
+			}
+		}
+		printf("\u2514 cap: %d/32\n", space);
+	}
+
+	free(argv1);
+	free(path);
 	return 0;
 }
-*/
+
 
 int mkdir(uint16_t argc, char **argv) {
 	if (argerr(argc,2))
