@@ -57,7 +57,6 @@ int ls(uint16_t argc, char **argv) {
 	char *argv1 = strdup(argv[1]);
 	char *delim = "/";
 	char **path = tkenizer(argv[1],delim);
-	
 
 	DataCluster cluster = readCL(9);
 	bool list = true;
@@ -79,12 +78,12 @@ int ls(uint16_t argc, char **argv) {
 	if (list) {
 		int space = 0;
 		cluster = readCL(block);
-		printf("\u250C 0x%04X %s\n", block, argv1);
+		printf("\u250C 0x%04X "BOLD"%s\n"NORM, block, argv1);
 		for (int i=0; i < 32; i++) {
 			if (cluster.dir[i].filename[0] != 0x0000) {
 				space++;
-				printf("\u251C 0x%04X ", cluster.dir[i].firstblock);
-				printf("%dB : ", cluster.dir[i].size);
+				printf("\u251C\u2574 0x%04X ", cluster.dir[i].firstblock);
+				printf("%dB ", cluster.dir[i].size);
 				if (cluster.dir[i].attributes == 1)
 					printf(BOLD"%s"NORM, cluster.dir[i].filename);
 				else 
