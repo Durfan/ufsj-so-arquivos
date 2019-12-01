@@ -73,10 +73,11 @@ int mkdir(uint16_t argc, char **argv) {
 		cluster = readCL(block);
 		exists  = dirSET(cluster,path[i]);
 		if (exists < 0) {
-			folder = newdir(path[i]);
+			folder  = newdir(path[i]);
 			cluster = crtdir(cluster,folder);
 			writeCL(block,cluster);
 			writeFAT();
+			block = folder.firstblock;
 		}
 		else
 			block = exists;
