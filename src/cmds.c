@@ -68,27 +68,18 @@ int mkdir(uint16_t argc, char **argv) {
 	DataCluster cluster;
 	DirEntry folder;
 
-	int i=0, block;
+	int i=0, exists, block = 9;
 	while (path[i] != NULL) {
-		block = exists(cluster,path[i]);
-		if (i == 0) {
-			cluster = readCL(9);
-			if (block < 0) {
-				folder = newdir(path[i]);
-				cluster = crtdir(cluster,folder);
-				writeCL(9,cluster);
-				writeFAT();
-			}
+		cluster = readCL(block);
+		exists = dirSET(cluster,path[i]);
+		if (exists < 0) {
+			folder = newdir(path[i]);
+			cluster = crtdir(cluster,folder);
+			writeCL(block,cluster);
+			writeFAT();
 		}
-		else {
-			if (block < 0) {
-				folder = newdir(path[i]);
-				cluster = readCL(folder.firstblock);
-				cluster = crtdir(cluster,folder);
-				writeCL(folder.firstblock,cluster);
-				writeFAT();
-			}
-		}
+		else
+			block = exists;
 		i++;
 	}
 
@@ -103,7 +94,7 @@ DataCluster crtdir(DataCluster cluster, DirEntry folder) {
 	return cluster;
 }
 
-int exists(DataCluster cluster, char *path) {
+int dirSET(DataCluster cluster, char *path) {
 	int block = -1;
 	for (int i=0; i < 32; i++) {
 		if (strcmp(path,(char*)cluster.dir[i].filename) == 0)
