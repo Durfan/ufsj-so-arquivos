@@ -71,7 +71,7 @@ int mkdir(uint16_t argc, char **argv) {
 	int i=0, exists, block = 9;
 	while (path[i] != NULL) {
 		cluster = readCL(block);
-		exists = dirSET(cluster,path[i]);
+		exists  = dirSET(cluster,path[i]);
 		if (exists < 0) {
 			folder = newdir(path[i]);
 			cluster = crtdir(cluster,folder);
