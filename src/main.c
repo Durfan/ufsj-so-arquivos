@@ -3,6 +3,7 @@
 int main(void) {
 
 	setlocale(LC_ALL,"");
+	gFatplug = false;
 
 	system("clear");
 	printf(CYEL"%s [%s %s]"CRST"\n",

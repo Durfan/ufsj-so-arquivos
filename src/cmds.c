@@ -31,6 +31,7 @@ int init(uint16_t argc) {
 		fwrite(&gClusters,sizeof(DataCluster),1,fp);
 
 	fclose(fp);
+	gFatplug = true;
 	return 0;
 }
 
@@ -40,7 +41,10 @@ int load(uint16_t argc) {
 
 	FILE *fp = fopen(FATNAME,"rb");
 	if (fp == NULL) {
-		perror(program_invocation_short_name);
+		char *app = program_invocation_short_name;
+		char *err = strerror(ENODEV);
+		fprintf(stderr,"%s: %s\n",app,err);
+		puts("digite 'help' para ajuda");
 		return 1;
 	}
 
@@ -48,7 +52,7 @@ int load(uint16_t argc) {
 	fread(gFat,sizeof(gFat),1,fp);
 	fread(gRootdir,sizeof(gRootdir),1,fp);
 	fclose(fp);
-
+	gFatplug = true;
 	return 0;
 }
 
@@ -56,6 +60,11 @@ int load(uint16_t argc) {
 int ls(uint16_t argc, char **argv) {
 	if (argerr(argc,2))
 		return 1;
+	
+	if (gFatplug == false) {
+		plugerr();
+		return 1;
+	}
 
 	char *argv1 = strdup(argv[1]);
 	char *delim = "/";
@@ -102,6 +111,11 @@ int ls(uint16_t argc, char **argv) {
 int mkdir(uint16_t argc, char **argv) {
 	if (argerr(argc,2))
 		return 1;
+
+	if (gFatplug == false) {
+		plugerr();
+		return 1;
+	}
 
 	char *delim = "/";
 	char **path = tkenizer(argv[1],delim);
@@ -200,9 +214,9 @@ void help(void) {
 
 int format(void) {
 	int setfmt = -1;
-	printf("Deseja continuar? (s/n) ");
+	printf("Deseja Formatar? (s/n) ");
 	char c = getchar();
-	clrBuffer();
+	clrBuff();
 	switch (c) {
 		case 'S': case 's': setfmt = 1; break;
 		case 'N': case 'n': setfmt = 0; break;
@@ -214,7 +228,9 @@ int format(void) {
 int fatexist(void) {
 	FILE *fp = fopen(FATNAME,"r");
 	if (fp != NULL) {
-		printf("'%s' sera formatado.\n", FATNAME);
+		char *app = program_invocation_short_name;
+		char *err = strerror(EEXIST);
+		fprintf(stderr,"%s: %s: %s\n",app,FATNAME,err);
 		fclose(fp);
 		return 1;
 	}
@@ -222,9 +238,13 @@ int fatexist(void) {
 }
 
 // stackoverflow.com/questions/3969871
-void clrBuffer(void) {
+void clrBuff(void) {
 	char c;
 	do {
 		c = getchar();
 	} while (c != '\n' && c != EOF);
+}
+
+void plugerr(void) {
+
 }

@@ -28,6 +28,7 @@ uint16_t gFat[NUMCLUSTERS]; // 8 clusters da tabela FAT, 4096 entradas de 16 bit
 uint8_t  gBootblock[CLUSTER];
 DirEntry gRootdir[32];
 DataCluster gClusters[4086];
+bool gFatplug;
 
 DataCluster readCL(int index);
 void  writeCL(int index, DataCluster cluster);

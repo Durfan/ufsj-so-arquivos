@@ -14,7 +14,8 @@ void  help(void);
 
 int format(void);
 int fatexist(void);
-void clrBuffer(void);
+void plugerr(void);
+void clrBuff(void);
 
 DataCluster crtdir(DataCluster cluster, DirEntry folder);
 int dirSET(DataCluster cluster, char *path);
