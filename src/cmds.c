@@ -4,28 +4,31 @@ int init(uint16_t argc) {
 	if (argerr(argc,1))
 		return 1;
 
+	if (fatexist() && format() == 0)
+		return 0;
+
 	FILE *fp = fopen(FATNAME,"wb");
 	if (fp == NULL) {
 		perror(program_invocation_short_name);
 		exit(EXIT_FAILURE);
 	}
 
-	memset(g_bootblock,0xBB,sizeof(g_bootblock));
-	fwrite(&g_bootblock,sizeof(g_bootblock),1,fp);
+	memset(gBootblock,0xBB,sizeof(gBootblock));
+	fwrite(&gBootblock,sizeof(gBootblock),1,fp);
 
-	g_fat[0] = 0xFFFD;
+	gFat[0] = 0xFFFD;
 	for (int i=1; i < 9; ++i)
-		g_fat[i] = 0xFFFE;
-	g_fat[9] = 0xFFFF;
+		gFat[i] = 0xFFFE;
+	gFat[9] = 0xFFFF;
 	for (int i=10; i < NUMCLUSTERS; ++i)
-		g_fat[i] = 0x0000;
-	fwrite(&g_fat,sizeof(g_fat),1,fp);
+		gFat[i] = 0x0000;
+	fwrite(&gFat,sizeof(gFat),1,fp);
 
-	memset(g_rootdir,0x00,sizeof(g_rootdir));
-	fwrite(&g_rootdir,sizeof(g_rootdir),1,fp);
+	memset(gRootdir,0x00,sizeof(gRootdir));
+	fwrite(&gRootdir,sizeof(gRootdir),1,fp);
 
 	for (int i=0; i < 4086; ++i)
-		fwrite(&g_clusters,sizeof(DataCluster),1,fp);
+		fwrite(&gClusters,sizeof(DataCluster),1,fp);
 
 	fclose(fp);
 	return 0;
@@ -38,12 +41,12 @@ int load(uint16_t argc) {
 	FILE *fp = fopen(FATNAME,"rb");
 	if (fp == NULL) {
 		perror(program_invocation_short_name);
-		exit(EXIT_FAILURE);
+		return 1;
 	}
 
-	fseek(fp,sizeof(g_bootblock),SEEK_SET);
-	fread(g_fat,sizeof(g_fat),1,fp);
-	fread(g_rootdir,sizeof(g_rootdir),1,fp);
+	fseek(fp,sizeof(gBootblock),SEEK_SET);
+	fread(gFat,sizeof(gFat),1,fp);
+	fread(gRootdir,sizeof(gRootdir),1,fp);
 	fclose(fp);
 
 	return 0;
@@ -76,7 +79,7 @@ int ls(uint16_t argc, char **argv) {
 	int space = 0;
 	cluster = readCL(block);
 	printf("\u250C 0x%04X "BOLD"%s\n"NORM, block, argv1);
-	for (int i=0; i < 32; i++) {
+	for (size_t i=0; i < ENTRYBYCLUSTER; i++) {
 		if (cluster.dir[i].filename[0] != 0x0000) {
 			space++;
 			printf("\u251C\u2574 0x%04X ", cluster.dir[i].firstblock);
@@ -135,7 +138,7 @@ DataCluster crtdir(DataCluster cluster, DirEntry folder) {
 
 int dirSET(DataCluster cluster, char *path) {
 	int block = -1;
-	for (int i=0; i < 32; i++) {
+	for (size_t i=0; i < ENTRYBYCLUSTER; i++) {
 		if (strcmp(path,(char*)cluster.dir[i].filename) == 0)
 			block = cluster.dir[i].firstblock;
 	}
@@ -149,7 +152,7 @@ DirEntry newdir(char *filename) {
 	strncpy((char*)folder.filename,filename,17*sizeof(char));
 	folder.attributes = 1;
 	folder.firstblock = findSpace();
-	g_fat[folder.firstblock] = 0xFFFF;
+	gFat[folder.firstblock] = 0xFFFF;
 	folder.size = 0x0400;
 	return folder;
 }
@@ -193,4 +196,35 @@ void help(void) {
 	puts("           ler um arquivo:   read [/caminho/arquivo]");
 	puts("            exibe a ajuda:   help");
 	puts("                     sair:   exit");
+}
+
+int format(void) {
+	int setfmt = -1;
+	printf("Deseja continuar? (s/n) ");
+	char c = getchar();
+	clrBuffer();
+	switch (c) {
+		case 'S': case 's': setfmt = 1; break;
+		case 'N': case 'n': setfmt = 0; break;
+		default: format();
+	}
+	return setfmt;
+}
+
+int fatexist(void) {
+	FILE *fp = fopen(FATNAME,"r");
+	if (fp != NULL) {
+		printf("'%s' sera formatado.\n", FATNAME);
+		fclose(fp);
+		return 1;
+	}
+	return 0;
+}
+
+// stackoverflow.com/questions/3969871
+void clrBuffer(void) {
+	char c;
+	do {
+		c = getchar();
+	} while (c != '\n' && c != EOF);
 }

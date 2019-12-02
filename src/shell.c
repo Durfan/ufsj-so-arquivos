@@ -16,9 +16,8 @@ void shell(void) {
 	do {
 
 		prompt(status);
-		if (fgets(cmd,MAXCMD,stdin) && strcmp(cmd,"\n")) {
+		if (fgets(cmd,MAXCMD,stdin) && strcmp(cmd,"\n"))
 			status = commands(cmd);
-		}
 		else
 			status = 0;
 		freebuf(cmd);
@@ -91,7 +90,7 @@ int commands(char *cmd) {
 }
 
 void prompt(int status) {
-	printf("%s:"BOLD,program_invocation_short_name);
+	printf("%s:/"BOLD,program_invocation_short_name);
 	if (status == 1)
 		printf(CRED"$ "CRST);
 	else	

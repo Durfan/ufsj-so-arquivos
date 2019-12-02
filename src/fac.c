@@ -36,14 +36,14 @@ void writeFAT(void) {
 	}
 
 	fseek(fp,CLUSTER,SEEK_SET);
-	fwrite(&g_fat,NUMCLUSTERS,1,fp);
+	fwrite(&gFat,NUMCLUSTERS,1,fp);
 
 	fclose(fp);
 }
 
 int findSpace(void) {
 	int i = 0;
-	while (g_fat[i] != 0x0000 && i < NUMCLUSTERS) i++;
+	while (gFat[i] != 0x0000 && i < NUMCLUSTERS) i++;
 	if (i == NUMCLUSTERS)
 		return -1;
 	return i;

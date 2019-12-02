@@ -12,6 +12,10 @@ int append(uint16_t argc, char **argv);
 int   read(uint16_t argc, char **argv);
 void  help(void);
 
+int format(void);
+int fatexist(void);
+void clrBuffer(void);
+
 DataCluster crtdir(DataCluster cluster, DirEntry folder);
 int dirSET(DataCluster cluster, char *path);
 DirEntry newdir(char *filename);

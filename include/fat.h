@@ -24,10 +24,10 @@ typedef union datacluster_t {
 	uint8_t data[CLUSTER];
 } DataCluster;
 
-uint16_t g_fat[NUMCLUSTERS]; // 8 clusters da tabela FAT, 4096 entradas de 16 bits = 8192 bytes
-uint8_t  g_bootblock[CLUSTER];
-DirEntry g_rootdir[32];
-DataCluster g_clusters[4086];
+uint16_t gFat[NUMCLUSTERS]; // 8 clusters da tabela FAT, 4096 entradas de 16 bits = 8192 bytes
+uint8_t  gBootblock[CLUSTER];
+DirEntry gRootdir[32];
+DataCluster gClusters[4086];
 
 DataCluster readCL(int index);
 void  writeCL(int index, DataCluster cluster);
