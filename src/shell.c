@@ -90,7 +90,12 @@ int commands(char *cmd) {
 }
 
 void prompt(int status) {
-	printf("%s:/"BOLD,program_invocation_short_name);
+	printf("%s:",program_invocation_short_name);
+	if (gFatplug == false)
+		printf(CRED"/"CRST);
+	else
+		printf("/");
+	printf(BOLD);
 	if (status == 1)
 		printf(CRED"$ "CRST);
 	else	

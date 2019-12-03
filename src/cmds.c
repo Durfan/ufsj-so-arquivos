@@ -246,5 +246,7 @@ void clrBuff(void) {
 }
 
 void plugerr(void) {
-
+	char *app = program_invocation_short_name;
+	char *err = strerror(ENXIO);
+	fprintf(stderr,"%s: %s\n",app,err);
 }
