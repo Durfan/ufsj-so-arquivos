@@ -66,24 +66,30 @@ int ls(uint16_t argc, char **argv) {
 		return 1;
 	}
 
-	char *argv1 = strdup(argv[1]);
-	char *delim = "/";
-	char **path = tkenizer(argv[1],delim);
-
 	DataCluster cluster = readCL(9);
 	int i=0, exists, block = 9;
+	char *argv1 = NULL;
+	char **path = NULL;
+	char *delim = "/";
 
-	while (path[i] != NULL) {
-		cluster = readCL(block);
-		exists  = dirSET(cluster,path[i]);
-		if (exists < 0) {
-			fprintf(stderr,"%s\n",strerror(ENOENT));
-			return 1;
+	if (argc > 1) {
+		argv1 = strdup(argv[1]);
+		path = tkenizer(argv[1],delim);
+
+		while (path[i] != NULL) {
+			cluster = readCL(block);
+			exists  = dirSET(cluster,path[i]);
+			if (exists < 0) {
+				fprintf(stderr,"%s\n",strerror(ENOENT));
+				return 1;
+			}
+			else
+				block = exists;
+			i++;
 		}
-		else
-			block = exists;
-		i++;
 	}
+	else
+		argv1 = strdup("root");
 
 	int space = 0;
 	cluster = readCL(block);
@@ -117,12 +123,12 @@ int mkdir(uint16_t argc, char **argv) {
 		return 1;
 	}
 
-	char *delim = "/";
-	char **path = tkenizer(argv[1],delim);
-
 	DataCluster cluster;
 	DirEntry folder;
 	int i=0, exists, block = 9;
+
+	char *delim = "/";
+	char **path = tkenizer(argv[1],delim);
 
 	while (path[i] != NULL) {
 		cluster = readCL(block);
@@ -171,11 +177,30 @@ DirEntry newdir(char *filename) {
 	return folder;
 }
 
-/*
+
 int create(uint16_t argc, char **argv) {
+	if (argerr(argc,3))
+		return 1;
+
+	if (gFatplug == false) {
+		plugerr();
+		return 1;
+	}
+
+	size_t len = strlen(argv[1]);
+	printf("Tamanho: %ld\n", len);
+
+	char str1[CLUSTER];
+	char str2[CLUSTER];
+	memcpy(str1,argv[1], CLUSTER);
+	memcpy(str2,argv[1] + CLUSTER, CLUSTER);
+
+	printf("%s\n", str1);
 
 	return 0;
 }
+
+/*
 
 int unlink(uint16_t argc, char **argv) {
 

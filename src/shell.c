@@ -75,7 +75,7 @@ int commands(char *cmd) {
 	case LOAD:   status =   load(argc);      break;
 	case LS:     status =     ls(argc,argv); break;
 	case MKDIR:  status =  mkdir(argc,argv); break;
-	//case CREATE: status = create(argc,argv); break;
+	case CREATE: status = create(argc,argv); break;
 	//case UNLINK: status = unlink(argc,argv); break;
 	//case WRITE:  status =  write(argc,argv); break;
 	//case APPEND: status = append(argc,argv); break;
@@ -106,7 +106,7 @@ void prompt(int status) {
 int argerr(int argc, int args) {
 	char *app = program_invocation_short_name;
 	char *err = strerror(EINVAL);
-	if (argc != args) {
+	if (argc > args) {
 		fprintf(stderr,"%s: %s\n",app,err);
 		return 1;
 	}
