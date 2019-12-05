@@ -20,7 +20,7 @@
 uint64_t hashcmd(char *str);
 void shell(void);
 
-char** cmdparser(char *cmd, char tkn, size_t *tam);
+char **cmdparse(uint16_t *argc, char *cmd);
 char **tkenizer(char *input, char *delim);
 int commands(char *cmd);
 void  prompt(int status);

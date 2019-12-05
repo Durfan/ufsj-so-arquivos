@@ -26,54 +26,41 @@ void shell(void) {
 	shsair();
 }
 
-char **cmdparser(char *cmd, char tkn, size_t *tam) {
-	size_t qnt = 0;
-	char *p_token;
+char **cmdparse(uint16_t *argc, char *cmd) {
+	size_t tks = 0;
+	char *ptr = cmd;
+	while ((ptr = strchr(ptr,'"')) != NULL)
+		tks++, ptr++;
+	if (tks % 2 != 0)
+		return NULL;
 
-	// Pegando as aspas (pode mudar dpois)
-	p_token = strchr(cmd, '"');
-	while (p_token != NULL) {
-		qnt++;
-		p_token = strchr(p_token+1, '"');
-	} if (qnt%2!=0) return NULL;
-	
-	qnt = 1;
-	p_token = strchr(cmd, tkn);
-	while (p_token != NULL) {
-		qnt++;
-		p_token = strchr(p_token+1, tkn);
-	}
+	char **arg = calloc(32,sizeof(char*));
+	int i = 0, index = 0;
+	bool quote = false;
+	arg[index] = &cmd[0];
+	tks = 1;
 
-	// Alocando o texto
-	char **lista = calloc(qnt, sizeof(char*));
-	for(int i = 0; i < qnt; i++) {
-		lista[i] = calloc(strlen(cmd)+1, sizeof(char));
-	}
-
-	int pos = 0;
-	int i = 0, j = 0, aspas = 0;
-	for(; cmd[i] != '\0'; i++) {
-		if(cmd[i] == '"'){ 
-			aspas = !aspas; 
-			i++;
+	while (cmd[i] != '\n') {
+		if (cmd[i] == ' ' && !quote) {
+			while (cmd[i] == ' ')
+				cmd[i++] = '\0';
+			if (cmd[i] == '"') {
+				cmd[i++] = '\0';
+				quote = !quote;
+			}
+			arg[++index] = &cmd[i]; tks++;
 		}
-
-		if(cmd[i] == tkn && !aspas) {
-			lista[pos][j] = '\0';
-
-			j = 0; pos++;
-			continue;
+		if (cmd[i] == '"') {
+			cmd[i] = '\0';
+			quote = !quote;
 		}
-
-		lista[pos][j] = cmd[i];
-		j++;
+		i++;
 	}
 
-	lista[pos][j] = '\0';
-	qnt = pos+1;
-
-	(*tam) = qnt;
-	return lista;
+	cmd[i] = '\0';
+	arg[++index] = NULL;
+	(*argc) = tks;
+	return arg;
 }
 
 char **tkenizer(char *input, char *delim) {
@@ -109,12 +96,8 @@ unsigned argcount(char **argv) {
 }
 
 int commands(char *cmd) {
-	char delim = ' ';
-	strtok(cmd,"\n");
-	size_t tam = 0;
-	char **argv = cmdparser(cmd,delim,&tam);
-
-	uint16_t argc = tam;
+	uint16_t argc = 0;
+	char **argv = cmdparse(&argc,cmd);
 	uint64_t hash = hashcmd(argv[0]);
 	int status = 0;
 
@@ -137,7 +120,7 @@ int commands(char *cmd) {
 	default:     status = cmderr(cmd);       break;
 	}
 
-	//free(argv);
+	free(argv);
 	return status;
 }
 
@@ -178,13 +161,15 @@ void shsair(void) {
 }
 
 void dbgtokn(char **tokens) {
+	if (tokens == NULL)
+		return;
 	int i = 0;
-	printf(CYEL);
 	while (tokens[i] != NULL) {
+		printf(CYEL);
 		printf("tokens[%d] = %s\n",i,tokens[i]);
+		printf(CRST);
 		i++;
 	}
-	printf(CRST);
 }
 
 void dbgargv(uint64_t hash, uint16_t argc, char **argv) {

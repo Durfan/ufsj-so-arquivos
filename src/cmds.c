@@ -187,15 +187,8 @@ int create(uint16_t argc, char **argv) {
 		return 1;
 	}
 
-	size_t len = strlen(argv[1]);
-	printf("Tamanho: %ld\n", len);
-
-	char str1[CLUSTER];
-	char str2[CLUSTER];
-	memcpy(str1,argv[1], CLUSTER);
-	memcpy(str2,argv[1] + CLUSTER, CLUSTER);
-
-	printf("%s\n", str1);
+	printf("%s\n", argv[1]);
+	printf("%s\n", argv[2]);
 
 	return 0;
 }
