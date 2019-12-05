@@ -167,8 +167,6 @@ int dirSET(DataCluster cluster, char *path) {
 
 DirEntry newdir(char *filename) {
 	DirEntry folder;
-	memset(folder.filename,'\0',18*sizeof(char));
-	memset(folder.reserved,0,7*sizeof(char));
 	strncpy((char*)folder.filename,filename,17*sizeof(char));
 	folder.attributes = 1;
 	folder.firstblock = findSpace();
@@ -198,13 +196,14 @@ int create(uint16_t argc, char **argv) {
 	int block = mkdir(2,mkpath(argv1));
 	DataCluster cluster = readCL(block);
 	DirEntry file;
-	memset(file.filename,'\0',18*sizeof(char));
-	memset(file.reserved,0,7*sizeof(char));
 	strncpy((char*)file.filename,filename,17*sizeof(char));
 	file.attributes = 0;
 	file.firstblock = findSpace();
 	gFat[file.firstblock] = 0xFFFF;
 	file.size = 0x0400;
+
+	// busca espaco no cluster
+
 	writeCL(block,cluster);
 	writeFAT();
 
