@@ -26,6 +26,56 @@ void shell(void) {
 	shsair();
 }
 
+char **cmdparser(char *cmd, char tkn, size_t *tam) {
+	size_t qnt = 0;
+	char *p_token;
+
+	// Pegando as aspas (pode mudar dpois)
+	p_token = strchr(cmd, '"');
+	while (p_token != NULL) {
+		qnt++;
+		p_token = strchr(p_token+1, '"');
+	} if (qnt%2!=0) return NULL;
+	
+	qnt = 1;
+	p_token = strchr(cmd, tkn);
+	while (p_token != NULL) {
+		qnt++;
+		p_token = strchr(p_token+1, tkn);
+	}
+
+	// Alocando o texto
+	char **lista = calloc(qnt, sizeof(char*));
+	for(int i = 0; i < qnt; i++) {
+		lista[i] = calloc(strlen(cmd)+1, sizeof(char));
+	}
+
+	int pos = 0;
+	int i = 0, j = 0, aspas = 0;
+	for(; cmd[i] != '\0'; i++) {
+		if(cmd[i] == '"'){ 
+			aspas = !aspas; 
+			i++;
+		}
+
+		if(cmd[i] == tkn && !aspas) {
+			lista[pos][j] = '\0';
+
+			j = 0; pos++;
+			continue;
+		}
+
+		lista[pos][j] = cmd[i];
+		j++;
+	}
+
+	lista[pos][j] = '\0';
+	qnt = pos+1;
+
+	(*tam) = qnt;
+	return lista;
+}
+
 char **tkenizer(char *input, char *delim) {
 	char **tokens = malloc(32 * sizeof(char*));
 	if (tokens == NULL) {
@@ -59,10 +109,12 @@ unsigned argcount(char **argv) {
 }
 
 int commands(char *cmd) {
-	char *delim = " \n";
-	char **argv = tkenizer(cmd,delim);
+	char delim = ' ';
+	strtok(cmd,"\n");
+	size_t tam = 0;
+	char **argv = cmdparser(cmd,delim,&tam);
 
-	uint16_t argc = argcount(argv);
+	uint16_t argc = tam;
 	uint64_t hash = hashcmd(argv[0]);
 	int status = 0;
 
@@ -85,7 +137,7 @@ int commands(char *cmd) {
 	default:     status = cmderr(cmd);       break;
 	}
 
-	free(argv);
+	//free(argv);
 	return status;
 }
 
