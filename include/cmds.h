@@ -1,6 +1,8 @@
 #ifndef INCLUDE_CMDS_H
 #define INCLUDE_CMDS_H
 
+#define mkpath(X) (char*[]){"",X}
+
 int   init(uint16_t argc);
 int   load(uint16_t argc);
 int     ls(uint16_t argc, char **argv);
@@ -14,7 +16,6 @@ void  help(void);
 
 int format(void);
 int fatexist(void);
-void plugerr(void);
 void clrBuff(void);
 
 DataCluster crtdir(DataCluster cluster, DirEntry folder);

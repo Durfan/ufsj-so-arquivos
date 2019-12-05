@@ -1,8 +1,8 @@
 #include "main.h"
 
 int init(uint16_t argc) {
-	if (argerr(argc,1))
-		return 1;
+	if (argerr(argc,1,EINVAL))
+		return -1;
 
 	if (fatexist() && format() == 0)
 		return 0;
@@ -36,8 +36,8 @@ int init(uint16_t argc) {
 }
 
 int load(uint16_t argc) {
-	if (argerr(argc,1))
-		return 1;
+	if (argerr(argc,1,EINVAL))
+		return -1;
 
 	FILE *fp = fopen(FATNAME,"rb");
 	if (fp == NULL) {
@@ -45,7 +45,7 @@ int load(uint16_t argc) {
 		char *err = strerror(ENODEV);
 		fprintf(stderr,"%s: %s\n",app,err);
 		puts("digite 'help' para ajuda");
-		return 1;
+		return -1;
 	}
 
 	fseek(fp,sizeof(gBootblock),SEEK_SET);
@@ -58,30 +58,30 @@ int load(uint16_t argc) {
 
 
 int ls(uint16_t argc, char **argv) {
-	if (argerr(argc,2))
-		return 1;
+	if (argerr(argc,2,EINVAL))
+		return -1;
 	
 	if (gFatplug == false) {
-		plugerr();
-		return 1;
+		erro(ENXIO);
+		return -1;
 	}
 
 	DataCluster cluster = readCL(9);
-	int i=0, exists, block = 9;
+	int i=0,exists,block=9,tks=0;
 	char *argv1 = NULL;
 	char **path = NULL;
 	char *delim = "/";
 
 	if (argc > 1) {
 		argv1 = strdup(argv[1]);
-		path = tkenizer(argv[1],delim);
+		path = tkenizer(argv[1],delim,&tks);
 
 		while (path[i] != NULL) {
 			cluster = readCL(block);
 			exists  = dirSET(cluster,path[i]);
 			if (exists < 0) {
-				fprintf(stderr,"%s\n",strerror(ENOENT));
-				return 1;
+				erro(ENOENT);
+				return -1;
 			}
 			else
 				block = exists;
@@ -110,25 +110,25 @@ int ls(uint16_t argc, char **argv) {
 
 	free(argv1);
 	free(path);
-	return 0;
+	return block;
 }
 
 
 int mkdir(uint16_t argc, char **argv) {
-	if (argerr(argc,2))
-		return 1;
+	if (argerr(argc,2,EINVAL))
+		return -1;
 
 	if (gFatplug == false) {
-		plugerr();
-		return 1;
+		erro(ENXIO);
+		return -1;
 	}
 
 	DataCluster cluster;
 	DirEntry folder;
-	int i=0, exists, block = 9;
+	int i=0,exists,block=9,tks=0;
 
 	char *delim = "/";
-	char **path = tkenizer(argv[1],delim);
+	char **path = tkenizer(argv[1],delim,&tks);
 
 	while (path[i] != NULL) {
 		cluster = readCL(block);
@@ -146,7 +146,7 @@ int mkdir(uint16_t argc, char **argv) {
 	}
 
 	free(path);
-	return 0;
+	return block;
 }
 
 DataCluster crtdir(DataCluster cluster, DirEntry folder) {
@@ -177,19 +177,38 @@ DirEntry newdir(char *filename) {
 	return folder;
 }
 
-
 int create(uint16_t argc, char **argv) {
-	if (argerr(argc,3))
-		return 1;
+	if (argerr(argc,2,EINVAL))
+		return -1;
 
 	if (gFatplug == false) {
-		plugerr();
-		return 1;
+		erro(ENXIO);
+		return -1;
 	}
 
-	printf("%s\n", argv[1]);
-	printf("%s\n", argv[2]);
+	char *argv1 = strdup(argv[1]);
+	char *filename = strrchr(argv1,'/');
+	if (filename == NULL) {
+		free(argv1);
+		return -1;
+	}
 
+	filename[0] = '\0';
+	filename += 1;
+	int block = mkdir(2,mkpath(argv1));
+	DataCluster cluster = readCL(block);
+	DirEntry file;
+	memset(file.filename,'\0',18*sizeof(char));
+	memset(file.reserved,0,7*sizeof(char));
+	strncpy((char*)file.filename,filename,17*sizeof(char));
+	file.attributes = 0;
+	file.firstblock = findSpace();
+	gFat[file.firstblock] = 0xFFFF;
+	file.size = 0x0400;
+	writeCL(block,cluster);
+	writeFAT();
+
+	free(argv1);
 	return 0;
 }
 
@@ -261,10 +280,4 @@ void clrBuff(void) {
 	do {
 		c = getchar();
 	} while (c != '\n' && c != EOF);
-}
-
-void plugerr(void) {
-	char *app = program_invocation_short_name;
-	char *err = strerror(ENXIO);
-	fprintf(stderr,"%s: %s\n",app,err);
 }

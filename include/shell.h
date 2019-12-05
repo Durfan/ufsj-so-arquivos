@@ -21,15 +21,18 @@ uint64_t hashcmd(char *str);
 void shell(void);
 
 char **cmdparse(uint16_t *argc, char *cmd);
-char **tkenizer(char *input, char *delim);
+char **tkenizer(char *input, char *delim, int *tks);
+
 int commands(char *cmd);
 void  prompt(int status);
-int   argerr(int argc, int args);
+int   argerr(int argc, int args, int errnum);
 int   cmderr(char *cmd);
 void  shsair(void);
 
+void erro(int errnum);
 void dbgtokn(char **tokens);
-void dbgargv(uint64_t hash, uint16_t argc, char **argv);
+void dbgargv(uint64_t hash, uint16_t argc);
+void eastere(void);
 
 //#pragma message __FILE__
 #endif // INCLUDE_SHELL_H
