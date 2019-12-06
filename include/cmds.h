@@ -12,15 +12,6 @@ int unlink(uint16_t argc, char **argv);
 int  write(uint16_t argc, char **argv);
 int append(uint16_t argc, char **argv);
 int   read(uint16_t argc, char **argv);
-void  help(void);
-
-int format(void);
-int fatexist(void);
-void clrBuff(void);
-
-DataCluster crtdir(DataCluster cluster, DirEntry folder);
-int dirSET(DataCluster cluster, char *path);
-DirEntry newdir(char *filename);
 
 //#pragma message __FILE__
 #endif // INCLUDE_CMDS_H

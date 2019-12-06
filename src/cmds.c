@@ -91,22 +91,8 @@ int ls(uint16_t argc, char **argv) {
 	else
 		argv1 = strdup("root");
 
-	int space = 0;
 	cluster = readCL(block);
-	printf("\u250C 0x%04X "BOLD"%s\n"NORM, block, argv1);
-	for (size_t i=0; i < ENTRYBYCLUSTER; i++) {
-		if (cluster.dir[i].filename[0] != 0x0000) {
-			space++;
-			printf("\u251C\u2574 0x%04X ", cluster.dir[i].firstblock);
-			printf("%dB ", cluster.dir[i].size);
-			if (cluster.dir[i].attributes == 1)
-				printf(BOLD"%s"NORM, cluster.dir[i].filename);
-			else 
-				printf("%s", cluster.dir[i].filename);
-			putchar(0x0A);
-		}
-	}
-	printf("\u2514 cap: %d/32\n", space);
+	prtls(cluster,block,argv1);
 
 	free(argv1);
 	free(path);
@@ -149,32 +135,6 @@ int mkdir(uint16_t argc, char **argv) {
 	return block;
 }
 
-DataCluster crtdir(DataCluster cluster, DirEntry folder) {
-	int i = 0;
-	while (cluster.dir[i].filename[0] != 0) i++;
-	cluster.dir[i] = folder;
-	return cluster;
-}
-
-int dirSET(DataCluster cluster, char *path) {
-	int block = -1;
-	for (size_t i=0; i < ENTRYBYCLUSTER; i++) {
-		if (strcmp(path,(char*)cluster.dir[i].filename) == 0)
-			block = cluster.dir[i].firstblock;
-	}
-	return block;
-}
-
-DirEntry newdir(char *filename) {
-	DirEntry folder;
-	strncpy((char*)folder.filename,filename,17*sizeof(char));
-	folder.attributes = 1;
-	folder.firstblock = findSpace();
-	gFat[folder.firstblock] = 0xFFFF;
-	folder.size = 0x0400;
-	return folder;
-}
-
 int create(uint16_t argc, char **argv) {
 	if (argerr(argc,2,EINVAL))
 		return -1;
@@ -202,8 +162,7 @@ int create(uint16_t argc, char **argv) {
 	gFat[file.firstblock] = 0xFFFF;
 	file.size = 0x0400;
 
-	// busca espaco no cluster
-
+	cluster = crtdir(cluster,file);
 	writeCL(block,cluster);
 	writeFAT();
 
@@ -233,50 +192,3 @@ int read(uint16_t argc, char **argv) {
 	return 0;
 }
 */
-
-void help(void) {
-	puts("      inicializar o drive:   init");
-	puts("         carregar o drive:   load");
-	puts("         listar diretorio:     ls [/caminho/diretorio]");
-	puts("          criar diretorio:  mkdir [/caminho/diretorio]");
-	puts("            criar arquivo: create [/caminho/arquivo]");
-	puts("excluir arquivo/diretorio: unlink [/caminho/arquivo]");
-	puts("      escrever no arquivo:  write \"string\" [/caminho/arquivo]");
-	puts("        anexar em arquivo: append \"string\" [/caminho/arquivo]");
-	puts("           ler um arquivo:   read [/caminho/arquivo]");
-	puts("            exibe a ajuda:   help");
-	puts("                     sair:   exit");
-}
-
-int format(void) {
-	int setfmt = -1;
-	printf("Deseja Formatar? (s/n) ");
-	char c = getchar();
-	clrBuff();
-	switch (c) {
-		case 'S': case 's': setfmt = 1; break;
-		case 'N': case 'n': setfmt = 0; break;
-		default: format();
-	}
-	return setfmt;
-}
-
-int fatexist(void) {
-	FILE *fp = fopen(FATNAME,"r");
-	if (fp != NULL) {
-		char *app = program_invocation_short_name;
-		char *err = strerror(EEXIST);
-		fprintf(stderr,"%s: %s: %s\n",app,FATNAME,err);
-		fclose(fp);
-		return 1;
-	}
-	return 0;
-}
-
-// stackoverflow.com/questions/3969871
-void clrBuff(void) {
-	char c;
-	do {
-		c = getchar();
-	} while (c != '\n' && c != EOF);
-}

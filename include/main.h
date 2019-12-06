@@ -14,6 +14,7 @@
 #include "config.h"
 #include "fat.h"
 #include "cmds.h"
+#include "cmdaux.h"
 #include "shell.h"
 
 //#pragma message __FILE__

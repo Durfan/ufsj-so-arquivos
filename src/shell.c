@@ -98,6 +98,7 @@ char **tkenizer(char *input, char *delim, int *tks) {
 	dbgtokn(tokens);
 	#endif
 
+	(*tks) = index;
 	return tokens;
 }
 
