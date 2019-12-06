@@ -2,6 +2,7 @@
 #define INCLUDE_CMDS_H
 
 #define mkpath(X) (char*[]){"",X}
+#define lspath(X) (char*[]){"",X}
 
 int   init(uint16_t argc);
 int   load(uint16_t argc);

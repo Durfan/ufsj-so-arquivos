@@ -170,17 +170,32 @@ int create(uint16_t argc, char **argv) {
 	return 0;
 }
 
-/*
-
-int unlink(uint16_t argc, char **argv) {
+/* int unlink(uint16_t argc, char **argv) {
 
 	return 0;
-}
+} */
 
 int write(uint16_t argc, char **argv) {
+	if (argerr(argc,3,EINVAL))
+		return -1;
 
+	if (gFatplug == false) {
+		erro(ENXIO);
+		return -1;
+	}
+
+	char *argv2 = strdup(argv[2]);
+	int block = ls(2,lspath(argv2));
+
+	DataCluster cluster = readCL(block);
+	memcpy(cluster.data,argv[1],strlen(argv[1]) * sizeof(char));
+	writeCL(block,cluster);
+
+	free(argv2);
 	return 0;
 }
+
+/*
 
 int append(uint16_t argc, char **argv) {
 
