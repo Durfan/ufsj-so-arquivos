@@ -25,11 +25,10 @@ char **tkenizer(char *input, char *delim, int *tks);
 
 int commands(char *cmd);
 void  prompt(int status);
-int   argerr(int argc, int args, int errnum);
+void    erro(int errnum);
 int   cmderr(char *cmd);
 void  shsair(void);
 
-void erro(int errnum);
 void dbgtokn(char **tokens);
 void dbgargv(uint64_t hash, uint16_t argc);
 void eastere(void);

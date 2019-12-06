@@ -1,8 +1,10 @@
 #include "main.h"
 
 int init(uint16_t argc) {
-	if (argerr(argc,1,EINVAL))
+	if (argc != 1) {
+		erro(EINVAL);
 		return -1;
+	}
 
 	if (fatexist() && format() == 0)
 		return 0;
@@ -36,8 +38,10 @@ int init(uint16_t argc) {
 }
 
 int load(uint16_t argc) {
-	if (argerr(argc,1,EINVAL))
+	if (argc != 1) {
+		erro(EINVAL);
 		return -1;
+	}
 
 	FILE *fp = fopen(FATNAME,"rb");
 	if (fp == NULL) {
@@ -58,11 +62,11 @@ int load(uint16_t argc) {
 
 
 int ls(uint16_t argc, char **argv) {
-	if (argerr(argc,2,EINVAL))
-		return -1;
-	
 	if (gFatplug == false) {
 		erro(ENXIO);
+		return -1;
+	} else if (argc > 2) {
+		erro(EINVAL);
 		return -1;
 	}
 
@@ -101,11 +105,11 @@ int ls(uint16_t argc, char **argv) {
 
 
 int mkdir(uint16_t argc, char **argv) {
-	if (argerr(argc,2,EINVAL))
-		return -1;
-
 	if (gFatplug == false) {
 		erro(ENXIO);
+		return -1;
+	} else if (argc != 2) {
+		erro(EINVAL);
 		return -1;
 	}
 
@@ -136,11 +140,11 @@ int mkdir(uint16_t argc, char **argv) {
 }
 
 int create(uint16_t argc, char **argv) {
-	if (argerr(argc,2,EINVAL))
-		return -1;
-
 	if (gFatplug == false) {
 		erro(ENXIO);
+		return -1;
+	} else if (argc != 2) {
+		erro(EINVAL);
 		return -1;
 	}
 
@@ -176,11 +180,11 @@ int create(uint16_t argc, char **argv) {
 } */
 
 int write(uint16_t argc, char **argv) {
-	if (argerr(argc,3,EINVAL))
-		return -1;
-
 	if (gFatplug == false) {
 		erro(ENXIO);
+		return -1;
+	} else if (argc != 3) {
+		erro(EINVAL);
 		return -1;
 	}
 

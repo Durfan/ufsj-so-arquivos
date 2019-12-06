@@ -110,13 +110,11 @@ unsigned argcount(char **argv) {
 }
 
 int commands(char *cmd) {
+	int status = 0;
 	uint16_t argc = 0;
 	char **argv = cmdparse(&argc,cmd);
-	if (argv == NULL)
-		return -1;
-
+	if (argv == NULL) return -1;
 	uint64_t hash = hashcmd(argv[0]);
-	int status = 0;
 
 	#ifdef DEBUG
 	dbgargv(hash,argc);
@@ -156,14 +154,10 @@ void prompt(int status) {
 	printf(NORM);
 }
 
-int argerr(int argc, int args, int errnum) {
+void erro(int errnum) {
 	char *app = program_invocation_short_name;
 	char *err = strerror(errnum);
-	if (argc > args) {
-		fprintf(stderr,"%s: %s\n",app,err);
-		return -1;
-	}
-	return 0;
+	fprintf(stderr,"%s: %s\n",app,err);
 }
 
 int cmderr(char *cmd) {
@@ -194,12 +188,6 @@ void dbgargv(uint64_t hash, uint16_t argc) {
 	printf("  cmdhash-> %ld\n",hash);
 	printf("     argc-> %d\n", argc);
 	printf(CRST);
-}
-
-void erro(int errnum) {
-	char *app = program_invocation_short_name;
-	char *err = strerror(errnum);
-	fprintf(stderr,"%s: %s\n",app,err);
 }
 
 void eastere(void) {
