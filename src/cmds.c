@@ -82,7 +82,7 @@ int ls(uint16_t argc, char **argv) {
 	char **path = tkenizer(argv[1],delim,&tks);
 	char *argv1 = strdup(argv[1]);
 
-	do {
+	while (path[i] != NULL) {
 		cluster = readCL(block);
 		exists  = dirSET(cluster,path[i]);
 
@@ -93,8 +93,8 @@ int ls(uint16_t argc, char **argv) {
 			return -1;
 		}
 		else block = exists;
-
-	} while (path[++i] != NULL);
+		i++;
+	};
 
 	cluster = readCL(block);
 	prtls(cluster,block,argv1);
