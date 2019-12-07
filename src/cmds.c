@@ -45,10 +45,7 @@ int load(uint16_t argc) {
 
 	FILE *fp = fopen(FATNAME,"rb");
 	if (fp == NULL) {
-		char *app = program_invocation_short_name;
-		char *err = strerror(ENODEV);
-		fprintf(stderr,"%s: %s\n",app,err);
-		puts("digite 'help' para ajuda");
+		erro(ENODEV);
 		return -1;
 	}
 
@@ -62,10 +59,9 @@ int load(uint16_t argc) {
 
 
 int ls(uint16_t argc, char **argv) {
-	if (gFatplug == false) {
-		erro(ENXIO);
+	if (fatplug())
 		return -1;
-	} else if (argc > 2) {
+	else if (argc > 2) {
 		erro(EINVAL);
 		return -1;
 	}
@@ -105,10 +101,9 @@ int ls(uint16_t argc, char **argv) {
 }
 
 int mkdir(uint16_t argc, char **argv) {
-	if (gFatplug == false) {
-		erro(ENXIO);
+	if (fatplug())
 		return -1;
-	} else if (argc != 2) {
+	else if (argc != 2) {
 		erro(EINVAL);
 		return -1;
 	}
@@ -119,6 +114,8 @@ int mkdir(uint16_t argc, char **argv) {
 
 	char *delim = "/";
 	char **path = tkenizer(argv[1],delim,&tks);
+	if (maxdname(path))
+		return -1;
 
 	while (path[i] != NULL) {
 		cluster = readCL(block);
@@ -140,10 +137,9 @@ int mkdir(uint16_t argc, char **argv) {
 }
 
 int create(uint16_t argc, char **argv) {
-	if (gFatplug == false) {
-		erro(ENXIO);
+	if (fatplug())
 		return -1;
-	} else if (argc != 2) {
+	else if (argc != 2) {
 		erro(EINVAL);
 		return -1;
 	}
@@ -163,6 +159,10 @@ int create(uint16_t argc, char **argv) {
 		filename[0] = '\0';
 		filename += 1;
 		block = mkdir(2,mkpath(argv1));
+		if (block == -1) {
+			free(argv1);
+			return -1;
+		}
 		cluster = readCL(block);
 		file = newentry(filename,0x00);
 		cluster = crtdir(cluster,file);
@@ -181,20 +181,25 @@ int create(uint16_t argc, char **argv) {
 } */
 
 int write(uint16_t argc, char **argv) {
-	if (gFatplug == false) {
-		erro(ENXIO);
+	if (fatplug())
 		return -1;
-	} else if (argc != 3) {
+	else if (argc != 3) {
 		erro(EINVAL);
 		return -1;
 	}
 
 	char *argv2 = strdup(argv[2]);
-	int block = ls(2,lspath(argv2));
+	int   block = ls(2,lspath(argv2));
+	int  blocks = (strlen(argv[1]) / (CLUSTER)) + 1;
 
 	DataCluster cluster = readCL(block);
-	memcpy(cluster.data,argv[1],strlen(argv[1]) * sizeof(char));
-	writeCL(block,cluster);
+
+	for (int i=0; i < blocks; i++) {
+		memcpy(cluster.data,argv[1],strlen(argv[1]) * sizeof(char));
+		writeCL(block,cluster);
+		block = freeAddr();
+	}
+	gFat[block] = 0xFFFF;
 
 	free(argv2);
 	return 0;

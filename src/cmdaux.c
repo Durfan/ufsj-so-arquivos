@@ -46,6 +46,22 @@ void prtls(DataCluster cluster, int block, char *path) {
 	printf("\u2514 cap: %d/32\n", space);
 }
 
+int maxdname(char **path) {
+	int i = 0;
+	bool max = false;
+	while (path[i] != NULL) {
+		if (strlen(path[i]) > 17)
+			max = true;
+		i++;
+	}
+	if (max) {
+		free(path);
+		erro(ENAMETOOLONG);
+		return 1;
+	}
+	return 0;
+}
+
 int fatexist(void) {
 	FILE *fp = fopen(FATNAME,"r");
 	if (fp != NULL) {
@@ -53,6 +69,14 @@ int fatexist(void) {
 		char *err = strerror(EEXIST);
 		fprintf(stderr,"%s: %s: %s\n",app,FATNAME,err);
 		fclose(fp);
+		return 1;
+	}
+	return 0;
+}
+
+int fatplug(void) {
+	if (gFatplug == false) {
+		erro(ENXIO);
 		return 1;
 	}
 	return 0;
