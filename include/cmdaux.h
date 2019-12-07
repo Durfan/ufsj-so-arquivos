@@ -2,7 +2,7 @@
 #define INCLUDE_CMDAUX_H
 
 DataCluster crtdir(DataCluster cluster, DirEntry folder);
-DirEntry newdir(char *filename);
+DirEntry newentry(char *filename, uint8_t attr);
 int dirSET(DataCluster cluster, char *path);
 void prtls(DataCluster cluster, int block, char *path);
 

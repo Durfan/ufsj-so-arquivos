@@ -70,30 +70,31 @@ int ls(uint16_t argc, char **argv) {
 		return -1;
 	}
 
-	DataCluster cluster = readCL(9);
-	int i=0,exists,block=9,tks=0;
-	char *argv1 = NULL;
-	char **path = NULL;
-	char *delim = "/";
-
-	if (argc > 1) {
-		argv1 = strdup(argv[1]);
-		path = tkenizer(argv[1],delim,&tks);
-
-		while (path[i] != NULL) {
-			cluster = readCL(block);
-			exists  = dirSET(cluster,path[i]);
-			if (exists < 0) {
-				erro(ENOENT);
-				return -1;
-			}
-			else
-				block = exists;
-			i++;
-		}
+	if (argc == 1) {
+		prtls(readCL(9),9,"root");
+		return 9;
 	}
-	else
-		argv1 = strdup("root");
+
+	DataCluster cluster;
+	int i=0,exists,block=9,tks=0;
+
+	char *delim = "/";
+	char **path = tkenizer(argv[1],delim,&tks);
+	char *argv1 = strdup(argv[1]);
+
+	do {
+		cluster = readCL(block);
+		exists  = dirSET(cluster,path[i]);
+
+		if (exists < 0) {
+			free(argv1);
+			free(path);
+			erro(ENOENT);
+			return -1;
+		}
+		else block = exists;
+
+	} while (path[++i] != NULL);
 
 	cluster = readCL(block);
 	prtls(cluster,block,argv1);
@@ -102,7 +103,6 @@ int ls(uint16_t argc, char **argv) {
 	free(path);
 	return block;
 }
-
 
 int mkdir(uint16_t argc, char **argv) {
 	if (gFatplug == false) {
@@ -123,17 +123,17 @@ int mkdir(uint16_t argc, char **argv) {
 	while (path[i] != NULL) {
 		cluster = readCL(block);
 		exists  = dirSET(cluster,path[i]);
+
 		if (exists < 0) {
-			folder  = newdir(path[i]);
+			folder  = newentry(path[i],0x01);
 			cluster = crtdir(cluster,folder);
 			writeCL(block,cluster);
 			writeFAT();
 			block = folder.firstblock;
 		}
-		else
-			block = exists;
+		else block = exists;
 		i++;
-	}
+	};
 
 	free(path);
 	return block;
@@ -157,14 +157,10 @@ int create(uint16_t argc, char **argv) {
 
 	filename[0] = '\0';
 	filename += 1;
+
 	int block = mkdir(2,mkpath(argv1));
 	DataCluster cluster = readCL(block);
-	DirEntry file;
-	strncpy((char*)file.filename,filename,17*sizeof(char));
-	file.attributes = 0;
-	file.firstblock = findSpace();
-	gFat[file.firstblock] = 0xFFFF;
-	file.size = 0x0400;
+	DirEntry file = newentry(filename,0x00);
 
 	cluster = crtdir(cluster,file);
 	writeCL(block,cluster);

@@ -142,15 +142,9 @@ int commands(char *cmd) {
 
 void prompt(int status) {
 	printf("%s:",program_invocation_short_name);
-	if (gFatplug == false)
-		printf(CRED"/"CRST);
-	else
-		printf("/");
+	printf(!gFatplug? CRED"/"CRST:"/");
 	printf(BOLD);
-	if (status < 0)
-		printf(CRED"$ "CRST);
-	else	
-		printf("$ ");
+	printf(status < 0? CRED"$ "CRST:"$ ");
 	printf(NORM);
 }
 

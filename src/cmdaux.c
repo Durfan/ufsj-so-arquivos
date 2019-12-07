@@ -1,20 +1,22 @@
 #include "main.h"
 
-DataCluster crtdir(DataCluster cluster, DirEntry folder) {
+DataCluster crtdir(DataCluster cluster, DirEntry entry) {
 	int i = 0;
 	while (cluster.dir[i].filename[0] != 0) i++;
-	cluster.dir[i] = folder;
+	cluster.dir[i] = entry;
 	return cluster;
 }
 
-DirEntry newdir(char *filename) {
-	DirEntry folder;
-	strncpy((char*)folder.filename,filename,17*sizeof(char));
-	folder.attributes = 1;
-	folder.firstblock = findSpace();
-	gFat[folder.firstblock] = 0xFFFF;
-	folder.size = 0x0400;
-	return folder;
+DirEntry newentry(char *filename, uint8_t attr) {
+	DirEntry entry;
+	memset(entry.filename,0x00,sizeof(entry.filename));
+	memset(entry.reserved,0x00,sizeof(entry.reserved));
+	strncpy((char*)entry.filename,filename,17*sizeof(char));
+	entry.attributes = attr;
+	entry.firstblock = freeAddr();
+	gFat[entry.firstblock] = 0xFFFF;
+	entry.size = 0x00000400;
+	return entry;
 }
 
 int dirSET(DataCluster cluster, char *path) {

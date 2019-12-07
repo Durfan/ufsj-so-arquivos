@@ -33,7 +33,7 @@ bool gFatplug;
 DataCluster readCL(int index);
 void  writeCL(int index, DataCluster cluster);
 void writeFAT(void);
-int findSpace(void);
+int  freeAddr(void);
 
 //#pragma message __FILE__
 #endif // INCLUDE_FAT_H

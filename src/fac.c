@@ -41,8 +41,8 @@ void writeFAT(void) {
 	fclose(fp);
 }
 
-int findSpace(void) {
-	int i = 0;
+int freeAddr(void) {
+	int i = 10;
 	while (gFat[i] != 0x0000 && i < NUMCLUSTERS) i++;
 	if (i == NUMCLUSTERS)
 		return -1;
