@@ -71,7 +71,7 @@ int ls(uint16_t argc, char **argv) {
 	}
 
 	if (argc == 1) {
-		prtls(readCL(9),9,"root");
+		prtls(readCL(9),9,"/");
 		return 9;
 	}
 
@@ -150,19 +150,24 @@ int create(uint16_t argc, char **argv) {
 
 	char *argv1 = strdup(argv[1]);
 	char *filename = strrchr(argv1,'/');
+	int block = 9;
+	DataCluster cluster;
+	DirEntry file;
+
 	if (filename == NULL) {
-		free(argv1);
-		return -1;
+		cluster = readCL(block);
+		file = newentry(argv1,0x00);
+		cluster = crtdir(cluster,file);
+	}
+	else {
+		filename[0] = '\0';
+		filename += 1;
+		block = mkdir(2,mkpath(argv1));
+		cluster = readCL(block);
+		file = newentry(filename,0x00);
+		cluster = crtdir(cluster,file);
 	}
 
-	filename[0] = '\0';
-	filename += 1;
-
-	int block = mkdir(2,mkpath(argv1));
-	DataCluster cluster = readCL(block);
-	DirEntry file = newentry(filename,0x00);
-
-	cluster = crtdir(cluster,file);
 	writeCL(block,cluster);
 	writeFAT();
 
