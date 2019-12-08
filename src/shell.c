@@ -54,7 +54,8 @@ char **cmdparse(uint16_t *argc, char *cmd) {
 			if (cmd[i] == '"') {
 				cmd[i++] = '\0';
 				quote = !quote;
-			}
+			} else if (cmd[i] == '\n')
+				continue;
 			arg[++index] = &cmd[i]; tks++;
 		}
 		if (cmd[i] == '"') {
@@ -64,15 +65,15 @@ char **cmdparse(uint16_t *argc, char *cmd) {
 		i++;
 	}
 
+	cmd[i] = '\0';
+	arg[++index] = NULL;
+	(*argc) = tks;
+
 	if (tks == 32) {
 		free(arg);
 		erro(E2BIG);
 		return NULL;
 	}
-
-	cmd[i] = '\0';
-	arg[++index] = NULL;
-	(*argc) = tks;
 	return arg;
 }
 

@@ -75,17 +75,22 @@ int ls(uint16_t argc, char **argv) {
 	int i=0,exists,block=9,tks=0;
 
 	char *delim = "/";
-	char **path = tkenizer(argv[1],delim,&tks);
 	char *argv1 = strdup(argv[1]);
+	char **path = tkenizer(argv[1],delim,&tks);
 
 	while (path[i] != NULL) {
 		cluster = readCL(block);
 		exists  = dirSET(cluster,path[i]);
 
-		if (exists < 0) {
+		if (exists == -1) {
 			free(argv1);
 			free(path);
 			erro(ENOENT);
+			return -1;
+		} else if (exists == -2) {
+			free(argv1);
+			free(path);
+			erro(ENOTDIR);
 			return -1;
 		}
 		else block = exists;
@@ -121,14 +126,17 @@ int mkdir(uint16_t argc, char **argv) {
 		cluster = readCL(block);
 		exists  = dirSET(cluster,path[i]);
 
-		if (exists < 0) {
+		if (exists == -1) {
 			folder  = newentry(path[i],0x01);
 			cluster = crtdir(cluster,folder);
 			writeCL(block,cluster);
 			writeFAT();
 			block = folder.firstblock;
-		}
-		else block = exists;
+		} else if (exists == -2) {
+			erro(ENOTDIR);
+			free(path);
+			return -1;
+		} else block = exists;
 		i++;
 	};
 
@@ -146,14 +154,15 @@ int create(uint16_t argc, char **argv) {
 
 	char *argv1 = strdup(argv[1]);
 	char *filename = strrchr(argv1,'/');
-	int block = 9;
+	char *entry;
+	int exists, block = 9;
 	DataCluster cluster;
 	DirEntry file;
 
 	if (filename == NULL) {
 		cluster = readCL(block);
-		file = newentry(argv1,0x00);
-		cluster = crtdir(cluster,file);
+		entry = argv1;
+		exists = dirSET(cluster,entry);
 	}
 	else {
 		filename[0] = '\0';
@@ -164,10 +173,18 @@ int create(uint16_t argc, char **argv) {
 			return -1;
 		}
 		cluster = readCL(block);
-		file = newentry(filename,0x00);
-		cluster = crtdir(cluster,file);
+		entry = filename;
+		exists = dirSET(cluster,entry);
 	}
 
+	if (exists == -2) {
+		erro(EEXIST);
+		free(argv1);
+		return -1;
+	}
+
+	file = newentry(entry,0x00);
+	cluster = crtdir(cluster,file);
 	writeCL(block,cluster);
 	writeFAT();
 

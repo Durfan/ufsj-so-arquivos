@@ -21,9 +21,14 @@ DirEntry newentry(char *filename, uint8_t attr) {
 
 int dirSET(DataCluster cluster, char *path) {
 	int block = -1;
+	char *filename = NULL;
 	for (size_t i=0; i < ENTRYBYCLUSTER; i++) {
-		if (strcmp(path,(char*)cluster.dir[i].filename) == 0)
+		filename = (char*)cluster.dir[i].filename;
+		if (strcmp(path,filename) == 0) {
 			block = cluster.dir[i].firstblock;
+			if (!cluster.dir[i].attributes)
+				block = -2;
+		}
 	}
 	return block;
 }
