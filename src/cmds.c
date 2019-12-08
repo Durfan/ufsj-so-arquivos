@@ -67,12 +67,13 @@ int ls(uint16_t argc, char **argv) {
 	}
 
 	if (argc == 1) {
-		prtls(readCL(9),9,"/");
+		prtls(readCL(9),"/",9);
 		return 9;
 	}
 
 	DataCluster cluster;
-	int i=0,exists,block=9,tks=0;
+	int i=0, block=9, tks=0;
+	int exists;
 
 	char *delim = "/";
 	char *argv1 = strdup(argv[1]);
@@ -80,7 +81,7 @@ int ls(uint16_t argc, char **argv) {
 
 	while (path[i] != NULL) {
 		cluster = readCL(block);
-		exists  = dirSET(cluster,path[i]);
+		exists  = dirSET(cluster,path[i],1);
 
 		if (exists == -1) {
 			free(argv1);
@@ -95,10 +96,10 @@ int ls(uint16_t argc, char **argv) {
 		}
 		else block = exists;
 		i++;
-	};
+	}
 
 	cluster = readCL(block);
-	prtls(cluster,block,argv1);
+	prtls(cluster,argv1,block);
 
 	free(argv1);
 	free(path);
@@ -115,7 +116,8 @@ int mkdir(uint16_t argc, char **argv) {
 
 	DataCluster cluster;
 	DirEntry folder;
-	int i=0,exists,block=9,tks=0;
+	int i=0, block=9, tks=0;
+	int exists;
 
 	char *delim = "/";
 	char **path = tkenizer(argv[1],delim,&tks);
@@ -124,7 +126,7 @@ int mkdir(uint16_t argc, char **argv) {
 
 	while (path[i] != NULL) {
 		cluster = readCL(block);
-		exists  = dirSET(cluster,path[i]);
+		exists  = dirSET(cluster,path[i],1);
 
 		if (exists == -1) {
 			folder  = newentry(path[i],0x01);
@@ -138,7 +140,7 @@ int mkdir(uint16_t argc, char **argv) {
 			return -1;
 		} else block = exists;
 		i++;
-	};
+	}
 
 	free(path);
 	return block;
@@ -152,17 +154,17 @@ int create(uint16_t argc, char **argv) {
 		return -1;
 	}
 
+	DataCluster cluster;
+	DirEntry file;
+	int exists, block = 9;
+
 	char *argv1 = strdup(argv[1]);
 	char *filename = strrchr(argv1,'/');
 	char *entry;
-	int exists, block = 9;
-	DataCluster cluster;
-	DirEntry file;
 
 	if (filename == NULL) {
 		cluster = readCL(block);
 		entry = argv1;
-		exists = dirSET(cluster,entry);
 	}
 	else {
 		filename[0] = '\0';
@@ -174,9 +176,9 @@ int create(uint16_t argc, char **argv) {
 		}
 		cluster = readCL(block);
 		entry = filename;
-		exists = dirSET(cluster,entry);
 	}
 
+	exists = dirSET(cluster,entry,1);
 	if (exists == -2) {
 		erro(EEXIST);
 		free(argv1);
@@ -205,20 +207,51 @@ int write(uint16_t argc, char **argv) {
 		return -1;
 	}
 
+	DataCluster cluster;
+	int i=0, block=9, tks=0;
+	int exists;
+
+	char *delim = "/";
 	char *argv2 = strdup(argv[2]);
-	int   block = ls(2,lspath(argv2));
-	int  blocks = (strlen(argv[1]) / (CLUSTER)) + 1;
+	char **path = tkenizer(argv[2],delim,&tks);
 
-	DataCluster cluster = readCL(block);
+	while (path[i] != NULL) {
+		cluster = readCL(block);
+		exists  = dirSET(cluster,path[i],0);
 
-	for (int i=0; i < blocks; i++) {
+		if (exists == -1) {
+			free(argv2);
+			free(path);
+			erro(ENOENT);
+			return -1;
+		} else block = exists;
+		i++;
+	}
+
+	int blocks = (strlen(argv[1]) / (CLUSTER));
+	i = 0;
+
+	if (blocks > 1) {
+		while (blocks) {
+			cluster = readCL(block);
+			strncpy((char*)cluster.data,&argv[1][i*CLUSTER],CLUSTER);
+			writeCL(block,cluster);
+			gFat[block] = freeAddr();
+			block = gFat[block];
+			gFat[block] = 0xFFFF;
+			blocks--;
+			i++;
+		}
+		writeFAT();
+	}
+	else {
+		cluster = readCL(block);
 		memcpy(cluster.data,argv[1],strlen(argv[1]) * sizeof(char));
 		writeCL(block,cluster);
-		block = freeAddr();
 	}
-	gFat[block] = 0xFFFF;
 
 	free(argv2);
+	free(path);
 	return 0;
 }
 

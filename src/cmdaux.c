@@ -19,21 +19,21 @@ DirEntry newentry(char *filename, uint8_t attr) {
 	return entry;
 }
 
-int dirSET(DataCluster cluster, char *path) {
+int dirSET(DataCluster cluster, char *path, bool file) {
 	int block = -1;
 	char *filename = NULL;
 	for (size_t i=0; i < ENTRYBYCLUSTER; i++) {
 		filename = (char*)cluster.dir[i].filename;
 		if (strcmp(path,filename) == 0) {
 			block = cluster.dir[i].firstblock;
-			if (!cluster.dir[i].attributes)
+			if (file && !cluster.dir[i].attributes)
 				block = -2;
 		}
 	}
 	return block;
 }
 
-void prtls(DataCluster cluster, int block, char *path) {
+void prtls(DataCluster cluster, char *path, int block) {
 	int space = 0;
 	printf("\u250C 0x%04X "BOLD"%s\n"NORM, block, path);
 	for (size_t i=0; i < ENTRYBYCLUSTER; i++) {
