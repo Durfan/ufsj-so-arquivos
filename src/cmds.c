@@ -228,24 +228,33 @@ int write(uint16_t argc, char **argv) {
 		i++;
 	}
 
-	int blocks = (strlen(argv[1]) / (CLUSTER));
-	i = 0;
+	cluster = readCL(block);
+	if (strlen((char*)cluster.data) != 0) {
+		free(argv2);
+		free(path);
+		erro(EEXIST);
+		return -1;
+	}
+
+	int blocks = strlen(argv[1]) / CLUSTER;
+	if (strlen(argv[1]) % (CLUSTER) != 0)
+		blocks+=1;
+	int last;
 
 	if (blocks > 1) {
-		while (blocks) {
-			cluster = readCL(block);
+		for (int i=0; i < blocks; i++) {
 			strncpy((char*)cluster.data,&argv[1][i*CLUSTER],CLUSTER);
 			writeCL(block,cluster);
+			last = block;
+			gFat[block] = 0xFFFF;
 			gFat[block] = freeAddr();
 			block = gFat[block];
-			gFat[block] = 0xFFFF;
-			blocks--;
-			i++;
+			cluster = readCL(block);
 		}
+		gFat[last] = 0xFFFF;
 		writeFAT();
 	}
 	else {
-		cluster = readCL(block);
 		memcpy(cluster.data,argv[1],strlen(argv[1]) * sizeof(char));
 		writeCL(block,cluster);
 	}

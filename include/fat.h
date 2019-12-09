@@ -2,7 +2,7 @@
 #define INCLUDE_FAT_H
 
 #define SECTORS 512
-#define CLUSTER 2*SECTORS
+#define CLUSTER (2*SECTORS)
 #define ENTRYBYCLUSTER CLUSTER/sizeof(DirEntry)
 #define NUMCLUSTERS 4096
 #define FATNAME "fat.part"
