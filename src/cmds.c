@@ -5,8 +5,7 @@ int init(uint16_t argc) {
 		erro(EINVAL);
 		return -1;
 	}
-
-	if (fatexist() && format() == 0)
+	if (fatexist() && !format())
 		return 0;
 
 	FILE *fp = fopen(FATNAME,"wb");
@@ -57,38 +56,40 @@ int load(uint16_t argc) {
 	return 0;
 }
 
-
 int ls(uint16_t argc, char **argv) {
-	if (fatplug())
+	if (isLoaded() == 0) {
+		erro(ENXIO);
 		return -1;
-	else if (argc > 2) {
+	} else if (argc > 2) {
 		erro(EINVAL);
 		return -1;
 	}
-
-	if (argc == 1) {
-		prtls(readCL(9),"/",9);
+	else if (argc == 1) {
+		prtls(rdClster(9),"/",9);
 		return 9;
 	}
 
-	DataCluster cluster;
-	int i=0, block=9, tks=0;
-	int exists;
+	DataCluster clster;
+	DirEntry folder;
+	int i=0, block=9;
+	int exists = -1;
+	int attrib = -1;
 
-	char *delim = "/";
 	char *argv1 = strdup(argv[1]);
-	char **path = tkenizer(argv[1],delim,&tks);
+	char **path = tkenizer(argv[1],"/");
 
 	while (path[i] != NULL) {
-		cluster = readCL(block);
-		exists  = dirSET(cluster,path[i],1);
+		clster = rdClster(block);
+		folder = getentry(clster,path[i]);
+		exists = folder.firstblock;
+		attrib = folder.attributes;
 
-		if (exists == -1) {
+		if (exists == 0) {
 			free(argv1);
 			free(path);
 			erro(ENOENT);
 			return -1;
-		} else if (exists == -2) {
+		} else if (attrib == 0) {
 			free(argv1);
 			free(path);
 			erro(ENOTDIR);
@@ -98,8 +99,8 @@ int ls(uint16_t argc, char **argv) {
 		i++;
 	}
 
-	cluster = readCL(block);
-	prtls(cluster,argv1,block);
+	clster = rdClster(block);
+	prtls(clster,argv1,block);
 
 	free(argv1);
 	free(path);
@@ -107,34 +108,37 @@ int ls(uint16_t argc, char **argv) {
 }
 
 int mkdir(uint16_t argc, char **argv) {
-	if (fatplug())
+	if (isLoaded() == 0) {
+		erro(ENXIO);
 		return -1;
-	else if (argc != 2) {
+	} else if (argc != 2) {
 		erro(EINVAL);
 		return -1;
 	}
 
-	DataCluster cluster;
+	DataCluster clster;
 	DirEntry folder;
-	int i=0, block=9, tks=0;
-	int exists;
+	int i=0, block=9;
+	int exists = -1;
+	int attrib = -1;
 
-	char *delim = "/";
-	char **path = tkenizer(argv[1],delim,&tks);
+	char **path = tkenizer(argv[1],"/");
 	if (maxdname(path))
 		return -1;
 
 	while (path[i] != NULL) {
-		cluster = readCL(block);
-		exists  = dirSET(cluster,path[i],1);
+		clster = rdClster(block);
+		folder = getentry(clster,path[i]);
+		exists = folder.firstblock;
+		attrib = folder.attributes;
 
-		if (exists == -1) {
-			folder  = newentry(path[i],0x01);
-			cluster = crtdir(cluster,folder);
-			writeCL(block,cluster);
+		if (exists == 0) {
+			folder = newentry(path[i],0x01);
+			clster = crtdir(clster,folder);
+			wrClster(block,clster);
 			writeFAT();
 			block = folder.firstblock;
-		} else if (exists == -2) {
+		} else if (attrib != 1) {
 			erro(ENOTDIR);
 			free(path);
 			return -1;
@@ -147,24 +151,25 @@ int mkdir(uint16_t argc, char **argv) {
 }
 
 int create(uint16_t argc, char **argv) {
-	if (fatplug())
+	if (isLoaded() == 0) {
+		erro(ENXIO);
 		return -1;
-	else if (argc != 2) {
+	} else if (argc != 2) {
 		erro(EINVAL);
 		return -1;
 	}
 
-	DataCluster cluster;
+	DataCluster clster;
 	DirEntry file;
-	int exists, block = 9;
+	int block = 9;
 
 	char *argv1 = strdup(argv[1]);
 	char *filename = strrchr(argv1,'/');
-	char *entry;
+	char *entry = NULL;
 
 	if (filename == NULL) {
-		cluster = readCL(block);
-		entry = argv1;
+		clster = rdClster(block);
+		entry  = argv1;
 	}
 	else {
 		filename[0] = '\0';
@@ -174,20 +179,24 @@ int create(uint16_t argc, char **argv) {
 			free(argv1);
 			return -1;
 		}
-		cluster = readCL(block);
+		clster = rdClster(block);
 		entry = filename;
 	}
 
-	exists = dirSET(cluster,entry,1);
-	if (exists == -2) {
-		erro(EEXIST);
+	file = getentry(clster,entry);
+	if (file.size != 0x00000000) {
 		free(argv1);
+		erro(EEXIST);
+		return -1;
+	} else if (strlen(entry)>17) {
+		free(argv1);
+		erro(ENAMETOOLONG);
 		return -1;
 	}
 
 	file = newentry(entry,0x00);
-	cluster = crtdir(cluster,file);
-	writeCL(block,cluster);
+	clster = crtdir(clster,file);
+	wrClster(block,clster);
 	writeFAT();
 
 	free(argv1);
@@ -200,27 +209,29 @@ int create(uint16_t argc, char **argv) {
 } */
 
 int write(uint16_t argc, char **argv) {
-	if (fatplug())
+	if (isLoaded() == 0) {
+		erro(ENXIO);
 		return -1;
-	else if (argc != 3) {
+	} else if (argc != 3) {
 		erro(EINVAL);
 		return -1;
 	}
 
-	DataCluster cluster;
-	int i=0, block=9, tks=0;
-	int exists;
+	DataCluster clster;
+	DirEntry file;
+	int i=0, block=9;
+	int exists = -1;
+	int attrib = -1;
 
-	char *delim = "/";
-	char *argv2 = strdup(argv[2]);
-	char **path = tkenizer(argv[2],delim,&tks);
+	char **path = tkenizer(argv[2],"/");
 
 	while (path[i] != NULL) {
-		cluster = readCL(block);
-		exists  = dirSET(cluster,path[i],0);
+		clster = rdClster(block);
+		file   = getentry(clster,path[i]);
+		exists = file.firstblock;
+		attrib = file.attributes;
 
-		if (exists == -1) {
-			free(argv2);
+		if (exists == 0) {
 			free(path);
 			erro(ENOENT);
 			return -1;
@@ -228,38 +239,40 @@ int write(uint16_t argc, char **argv) {
 		i++;
 	}
 
-	cluster = readCL(block);
-	if (strlen((char*)cluster.data) != 0) {
-		free(argv2);
+	clster = rdClster(block);
+	exists = strlen((char*)clster.data);
+
+	if (attrib != 0) {
+		free(path);
+		erro(EISDIR);
+		return -1;
+	} else if (exists != 0) {
 		free(path);
 		erro(EEXIST);
 		return -1;
 	}
 
-	int blocks = strlen(argv[1]) / CLUSTER;
-	if (strlen(argv[1]) % (CLUSTER) != 0)
-		blocks+=1;
-	int last;
+	int last, blocks = strlen(argv[1]) / CLUSTER;
+	if (strlen(argv[1]) % (CLUSTER) != 0) blocks+=1;
 
 	if (blocks > 1) {
 		for (int i=0; i < blocks; i++) {
-			strncpy((char*)cluster.data,&argv[1][i*CLUSTER],CLUSTER);
-			writeCL(block,cluster);
+			strncpy((char*)clster.data,&argv[1][i*CLUSTER],CLUSTER);
+			wrClster(block,clster);
 			last = block;
 			gFat[block] = 0xFFFF;
 			gFat[block] = freeAddr();
 			block = gFat[block];
-			cluster = readCL(block);
+			clster = rdClster(block);
 		}
 		gFat[last] = 0xFFFF;
 		writeFAT();
 	}
 	else {
-		memcpy(cluster.data,argv[1],strlen(argv[1]) * sizeof(char));
-		writeCL(block,cluster);
+		memcpy(clster.data,argv[1],strlen(argv[1]) * sizeof(char));
+		wrClster(block,clster);
 	}
 
-	free(argv2);
 	free(path);
 	return 0;
 }
@@ -272,26 +285,30 @@ int append(uint16_t argc, char **argv) {
 */
 
 int read(uint16_t argc, char **argv) {
-	if (fatplug())
+	if (isLoaded() == 0) {
+		erro(ENXIO);
 		return -1;
-	else if (argc != 2) {
+	} else if (argc != 2) {
 		erro(EINVAL);
 		return -1;
 	}
 
-	DataCluster cluster;
-	int i=0, block=9, tks=0;
-	int exists;
+	DataCluster clster;
+	DirEntry file;
+	int i=0, block=9;
+	int exists = -1;
+	int attrib = -1;
 
-	char *delim = "/";
 	char *argv1 = strdup(argv[1]);
-	char **path = tkenizer(argv[1],delim,&tks);
+	char **path = tkenizer(argv[1],"/");
 
 	while (path[i] != NULL) {
-		cluster = readCL(block);
-		exists  = dirSET(cluster,path[i],0);
+		clster = rdClster(block);
+		file   = getentry(clster,path[i]);
+		exists = file.firstblock;
+		attrib = file.attributes;
 
-		if (exists == -1) {
+		if (exists == 0) {
 			free(argv1);
 			free(path);
 			erro(ENOENT);
@@ -300,16 +317,22 @@ int read(uint16_t argc, char **argv) {
 		i++;
 	}
 
+	if (attrib != 0) {
+		free(path);
+		erro(EISDIR);
+		return -1;
+	}
+
 	int size = 0;
 	do {
-		cluster = readCL(block);
-		printf("%s", cluster.data);
+		clster = rdClster(block);
+		printf("%s", clster.data);
 		block = gFat[block];
 		size += CLUSTER;
 	} while (block != 0xFFFF);
 
 	printf("\n"CYEL);
-	printf("Arquivo: '%s'Tamanho: %dB",argv1,size);
+	printf("Arquivo: '%s' Tamanho: %dB",argv1,size);
 	printf("\n"CRST);
 
 	free(argv1);

@@ -1,6 +1,8 @@
 #include "main.h"
 
 // djb2 http://www.cse.yorku.ca/~oz/hash.html
+// pra que? porque strings.h e um saco, prefiro
+// um inteiro de 64bits do que um strcomp
 uint64_t hashcmd(char *str) {
 	uint64_t hash = 0x1505; // 5381
 	int c;
@@ -26,6 +28,7 @@ void shell(void) {
 	shsair();
 }
 
+// Automato simples para um parser da cmdline
 char **cmdparse(uint16_t *argc, char *cmd) {
 	size_t tks = 0;
 	char *ptr = cmd;
@@ -77,7 +80,8 @@ char **cmdparse(uint16_t *argc, char *cmd) {
 	return arg;
 }
 
-char **tkenizer(char *input, char *delim, int *tks) {
+// tokenizador generico
+char **tkenizer(char *input, char *delim) {
 	char **tokens = calloc(32,sizeof(char*));
 	if (tokens == NULL) {
 		perror(program_invocation_short_name);
@@ -99,15 +103,7 @@ char **tkenizer(char *input, char *delim, int *tks) {
 	dbgtokn(tokens);
 	#endif
 
-	(*tks) = index;
 	return tokens;
-}
-
-unsigned argcount(char **argv) {
-	unsigned index = 0;
-	while (argv[index] != NULL)
-		index++;
-	return index;
 }
 
 int commands(char *cmd) {

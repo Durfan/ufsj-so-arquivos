@@ -19,18 +19,15 @@ DirEntry newentry(char *filename, uint8_t attr) {
 	return entry;
 }
 
-int dirSET(DataCluster cluster, char *path, bool file) {
-	int block = -1;
+DirEntry getentry(DataCluster cluster, char *path) {
+	DirEntry entry = { 0 };
 	char *filename = NULL;
 	for (size_t i=0; i < ENTRYBYCLUSTER; i++) {
 		filename = (char*)cluster.dir[i].filename;
-		if (strcmp(path,filename) == 0) {
-			block = cluster.dir[i].firstblock;
-			if (file && !cluster.dir[i].attributes)
-				block = -2;
-		}
+		if (strcmp(path,filename) == 0)
+			entry = cluster.dir[i];
 	}
-	return block;
+	return entry;
 }
 
 void prtls(DataCluster cluster, char *path, int block) {
@@ -79,29 +76,23 @@ int fatexist(void) {
 	return 0;
 }
 
-int fatplug(void) {
-	if (gFatplug == false) {
-		erro(ENXIO);
-		return 1;
-	}
-	return 0;
-}
-
 int format(void) {
-	int setfmt = -1;
+	int answer = -1;
 	printf("Deseja Formatar? (s/n) ");
 	char c = getchar();
-	clrBf();
+	clrBuff();
 	switch (c) {
-		case 'S': case 's': setfmt = 1; break;
-		case 'N': case 'n': setfmt = 0; break;
+		case 'S': case 's': answer = 1; break;
+		case 'N': case 'n': answer = 0; break;
 		default: format();
 	}
-	return setfmt;
+	return answer;
 }
 
 // stackoverflow.com/questions/3969871
-void clrBf(void) {
+// porque? setbuf,fflush nao FUNCIONA
+// mas essa tosqueira, funciona
+void clrBuff(void) {
 	char c;
 	do {
 		c = getchar();
@@ -120,4 +111,8 @@ void help(void) {
 	puts("           ler um arquivo:   read [/caminho/arquivo]");
 	puts("            exibe a ajuda:   help");
 	puts("                     sair:   exit");
+}
+
+bool isLoaded(void) {
+	return gFatplug;
 }

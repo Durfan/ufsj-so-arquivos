@@ -30,8 +30,8 @@ DirEntry gRootdir[32];
 DataCluster gClusters[4086];
 bool gFatplug;
 
-DataCluster readCL(int index);
-void  writeCL(int index, DataCluster cluster);
+DataCluster rdClster(int index);
+void  wrClster(int index, DataCluster cluster);
 void writeFAT(void);
 int  freeAddr(void);
 

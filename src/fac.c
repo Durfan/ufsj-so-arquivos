@@ -1,6 +1,6 @@
 #include "main.h"
 
-DataCluster readCL(int index) {
+DataCluster rdClster(int index) {
 	FILE *fp = fopen(FATNAME,"rb");
 	if (fp == NULL) {
 		perror(program_invocation_short_name);
@@ -15,7 +15,7 @@ DataCluster readCL(int index) {
 	return cluster;
 }
 
-void writeCL(int index, DataCluster cluster) {
+void wrClster(int index, DataCluster cluster) {
 	FILE *fp = fopen(FATNAME,"rb+");
 	if (fp == NULL) {
 		perror(program_invocation_short_name);

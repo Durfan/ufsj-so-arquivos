@@ -21,7 +21,7 @@ uint64_t hashcmd(char *str);
 void shell(void);
 
 char **cmdparse(uint16_t *argc, char *cmd);
-char **tkenizer(char *input, char *delim, int *tks);
+char **tkenizer(char *input, char *delim);
 
 int commands(char *cmd);
 void  prompt(int status);
