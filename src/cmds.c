@@ -284,7 +284,7 @@ int read(uint16_t argc, char **argv) {
 	int exists;
 
 	char *delim = "/";
-	char *argv2 = strdup(argv[1]);
+	char *argv1 = strdup(argv[1]);
 	char **path = tkenizer(argv[1],delim,&tks);
 
 	while (path[i] != NULL) {
@@ -292,7 +292,7 @@ int read(uint16_t argc, char **argv) {
 		exists  = dirSET(cluster,path[i],0);
 
 		if (exists == -1) {
-			free(argv2);
+			free(argv1);
 			free(path);
 			erro(ENOENT);
 			return -1;
@@ -300,12 +300,19 @@ int read(uint16_t argc, char **argv) {
 		i++;
 	}
 
+	int size = 0;
 	do {
 		cluster = readCL(block);
 		printf("%s", cluster.data);
 		block = gFat[block];
+		size += CLUSTER;
 	} while (block != 0xFFFF);
-	putchar(0x0A);
 
+	printf("\n"CYEL);
+	printf("Arquivo: '%s'Tamanho: %dB",argv1,size);
+	printf("\n"CRST);
+
+	free(argv1);
+	free(path);
 	return 0;
 }
