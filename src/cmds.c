@@ -265,14 +265,47 @@ int write(uint16_t argc, char **argv) {
 }
 
 /*
-
 int append(uint16_t argc, char **argv) {
 
 	return 0;
 }
+*/
 
 int read(uint16_t argc, char **argv) {
+	if (fatplug())
+		return -1;
+	else if (argc != 2) {
+		erro(EINVAL);
+		return -1;
+	}
+
+	DataCluster cluster;
+	int i=0, block=9, tks=0;
+	int exists;
+
+	char *delim = "/";
+	char *argv2 = strdup(argv[1]);
+	char **path = tkenizer(argv[1],delim,&tks);
+
+	while (path[i] != NULL) {
+		cluster = readCL(block);
+		exists  = dirSET(cluster,path[i],0);
+
+		if (exists == -1) {
+			free(argv2);
+			free(path);
+			erro(ENOENT);
+			return -1;
+		} else block = exists;
+		i++;
+	}
+
+	do {
+		cluster = readCL(block);
+		printf("%s", cluster.data);
+		block = gFat[block];
+	} while (block != 0xFFFF);
+	putchar(0x0A);
 
 	return 0;
 }
-*/

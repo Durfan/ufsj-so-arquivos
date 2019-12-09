@@ -131,7 +131,7 @@ int commands(char *cmd) {
 	//case UNLINK: status = unlink(argc,argv); break;
 	case WRITE:  status =  write(argc,argv); break;
 	//case APPEND: status = append(argc,argv); break;
-	//case READ:   status =   read(argc,argv); break;
+	case READ:   status =   read(argc,argv); break;
 	case HELP:   help();                     break;
 	case EXIT:   free(argv); shsair();       exit(EXIT_SUCCESS);
 	default:     status = cmderr(cmd);       break;
