@@ -236,7 +236,10 @@ int unlink(uint16_t argc, char **argv) {
 		i++;
 	}
 
-
+	if(gFat[(int)folder.firstblock+1] != 0x00) {
+		printf("Diretório não vazio.\n");
+		return -1;
+	}
 	i = block;
 	if(gFat[i] != 0xFFFF){
 		while(gFat[i] != 0xFFFF){
