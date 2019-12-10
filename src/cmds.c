@@ -215,62 +215,69 @@ int unlink(uint16_t argc, char **argv) {
 		return -1;
 	}
 
-	DirEntry folder;
-	DataCluster cluster, empty;
-	int idx = -1;
-	int i=0, block=9, last = 9;
+	DataCluster clster;
+	DirEntry file;
+	int i=0, block=9;
+	int idx    = -1;
+	int entry  = -1;
 	int exists = -1;
+	int attrib = -1;
 
 	char **path = tkenizer(argv[1],"/");
 
 	while (path[i] != NULL) {
-		cluster = rdClster(block);
-		folder = getentry(cluster,path[i],&idx);
-		exists = folder.firstblock;
+		clster = rdClster(block);
+		file   = getentry(clster,path[i],&idx);
+		exists = file.firstblock;
+		attrib = file.attributes;
 
 		if (exists == 0) {
 			free(path);
 			erro(ENOENT);
 			return -1;
-		} else {
-			last = block;
+		}
+		else {
+			entry = block;
 			block = exists;
 		}
 		i++;
 	}
 
-	DirEntry entry = { 0 };
-	empty = rdClster((int)folder.firstblock);
-	for(long unsigned int j=0; j < ENTRYBYCLUSTER; j++) {
-		if(memcmp(empty.dir+j, &entry, sizeof(DirEntry))) {
-			if(folder.attributes == 1) {
-				printf("Diretório não vazio.\n");
-				return -1;
-			}
-		}
-	}
-	
-	i = block;
-	if (gFat[i] != 0xFFFF) {
-		while (gFat[i] != 0xFFFF) {
-			cluster = rdClster((int)gFat[i]-1);
-			memset(cluster.data,0x00,sizeof(cluster.data));
-			wrClster(i,cluster);
-			gFat[i] = 0x00;
-			i++;
-		}
-		cluster = rdClster((int)gFat[i]-1);
-		memset(cluster.data, 0x00, sizeof(cluster.data));
-		wrClster(i,cluster);
-		gFat[i] = 0x00;
-		cluster = rdClster(last);
-	}
+	if (attrib == 0) {
 
-	memset(cluster.dir+idx,0x00,sizeof(DirEntry));
-	gFat[block] = 0x00;
+		do {
+			exists = block;
+			rmClster(block);
+			block = gFat[block];
+			gFat[exists] = 0x0000;
+		} while (block != 0xFFFF);
+		writeFAT();
 
-	wrClster(last,cluster);
-	writeFAT();
+		clster = rdClster(entry);
+		memset(&clster.dir[idx],0x0000,sizeof(DirEntry));
+		wrClster(entry,clster);
+
+	} else if (attrib == 1) {
+
+		clster = rdClster(block);
+		int empty = strnlen((char*)clster.data,CLUSTER * sizeof(char));
+		if (empty != 0) {
+			free(path);
+			erro(ENOTEMPTY);
+			return -1;
+		}
+
+		clster = rdClster(entry);
+		memset(&clster.dir[idx],0x0000,sizeof(DirEntry));
+		wrClster(entry,clster);
+		gFat[block] = 0x0000;
+		writeFAT();
+
+	} else {
+		free(path);
+		erro(ENOSYS);
+		return -1;
+	}
 
 	free(path);
 	return 0;

@@ -31,7 +31,8 @@ DataCluster gClusters[4086];
 bool gFatplug;
 
 DataCluster rdClster(int index);
-void  wrClster(int index, DataCluster cluster);
+void wrClster(int index, DataCluster cluster);
+void rmClster(int index);
 void writeFAT(void);
 int  freeAddr(void);
 

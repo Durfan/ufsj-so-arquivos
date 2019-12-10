@@ -28,6 +28,20 @@ void wrClster(int index, DataCluster cluster) {
 	fclose(fp);
 }
 
+void rmClster(int index) {
+	FILE *fp = fopen(FATNAME,"rb+");
+	if (fp == NULL) {
+		perror(program_invocation_short_name);
+		exit(EXIT_FAILURE);
+	}
+
+	DataCluster cluster = { 0x00 };
+	fseek(fp,(CLUSTER*index),SEEK_SET);
+	fwrite(&cluster,CLUSTER,1,fp);
+
+	fclose(fp);
+}
+
 void writeFAT(void) {
 	FILE *fp = fopen(FATNAME,"rb+");
 	if (fp == NULL) {
