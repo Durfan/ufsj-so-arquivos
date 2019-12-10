@@ -331,7 +331,7 @@ int write(uint16_t argc, char **argv) {
 		writeFAT();
 
 		clster = rdClster(entry);
-		clster.dir[idx].size *= blocks;
+		clster.dir[idx].size = (blocks * CLUSTER);
 		wrClster(entry,clster);
 	}
 	else {
