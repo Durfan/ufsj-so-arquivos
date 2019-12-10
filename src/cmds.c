@@ -72,6 +72,7 @@ int ls(uint16_t argc, char **argv) {
 	DataCluster clster;
 	DirEntry folder;
 	int i=0, block=9;
+	int idx    = -1;
 	int exists = -1;
 	int attrib = -1;
 
@@ -80,7 +81,7 @@ int ls(uint16_t argc, char **argv) {
 
 	while (path[i] != NULL) {
 		clster = rdClster(block);
-		folder = getentry(clster,path[i]);
+		folder = getentry(clster,path[i],&idx);
 		exists = folder.firstblock;
 		attrib = folder.attributes;
 
@@ -119,6 +120,7 @@ int mkdir(uint16_t argc, char **argv) {
 	DataCluster clster;
 	DirEntry folder;
 	int i=0, block=9;
+	int idx    = -1;
 	int exists = -1;
 	int attrib = -1;
 
@@ -128,7 +130,7 @@ int mkdir(uint16_t argc, char **argv) {
 
 	while (path[i] != NULL) {
 		clster = rdClster(block);
-		folder = getentry(clster,path[i]);
+		folder = getentry(clster,path[i],&idx);
 		exists = folder.firstblock;
 		attrib = folder.attributes;
 
@@ -161,6 +163,7 @@ int create(uint16_t argc, char **argv) {
 
 	DataCluster clster;
 	DirEntry file;
+	int idx  = -1;
 	int block = 9;
 
 	char *argv1 = strdup(argv[1]);
@@ -183,7 +186,7 @@ int create(uint16_t argc, char **argv) {
 		entry = filename;
 	}
 
-	file = getentry(clster,entry);
+	file = getentry(clster,entry,&idx);
 	if (file.size != 0x00000000) {
 		free(argv1);
 		erro(EEXIST);
@@ -204,7 +207,6 @@ int create(uint16_t argc, char **argv) {
 }
 
 int unlink(uint16_t argc, char **argv) {
-
 	if (isLoaded() == 0) {
 		erro(ENXIO);
 		return -1;
@@ -215,33 +217,33 @@ int unlink(uint16_t argc, char **argv) {
 
 	DirEntry folder;
 	DataCluster cluster;
-	int i=0, block=9, last = 9;;
+	int idx = -1;
+	int i=0, block=9, last = 9;
 	int exists = -1;
 
 	char **path = tkenizer(argv[1],"/");
 
 	while (path[i] != NULL) {
 		cluster = rdClster(block);
-		folder = getentry(cluster,path[i]);
+		folder = getentry(cluster,path[i],&idx);
 		exists = folder.firstblock;
 
 		if (exists == 0) {
 			free(path);
 			erro(ENOENT);
 			return -1;
-		} else{
+		} else {
 			last = block;
 			block = exists;
 		}
 		i++;
 	}
 
-
 	i = block;
-	if(gFat[i] != 0xFFFF){
-		while(gFat[i] != 0xFFFF){
+	if (gFat[i] != 0xFFFF) {
+		while (gFat[i] != 0xFFFF) {
 			cluster = rdClster((int)gFat[i]-1);
-			memset(cluster.data, 0x00, sizeof(cluster.data));
+			memset(cluster.data,0x00,sizeof(cluster.data));
 			wrClster(i,cluster);
 			gFat[i] = 0x00;
 			i++;
@@ -274,6 +276,8 @@ int write(uint16_t argc, char **argv) {
 	DataCluster clster;
 	DirEntry file;
 	int i=0, block=9;
+	int idx    = -1;
+	int entry  = -1;
 	int exists = -1;
 	int attrib = -1;
 
@@ -281,7 +285,7 @@ int write(uint16_t argc, char **argv) {
 
 	while (path[i] != NULL) {
 		clster = rdClster(block);
-		file   = getentry(clster,path[i]);
+		file   = getentry(clster,path[i],&idx);
 		exists = file.firstblock;
 		attrib = file.attributes;
 
@@ -289,7 +293,11 @@ int write(uint16_t argc, char **argv) {
 			free(path);
 			erro(ENOENT);
 			return -1;
-		} else block = exists;
+		}
+		else {
+			entry = block;
+			block = exists;
+		}
 		i++;
 	}
 
@@ -321,6 +329,10 @@ int write(uint16_t argc, char **argv) {
 		}
 		gFat[last] = 0xFFFF;
 		writeFAT();
+
+		clster = rdClster(entry);
+		clster.dir[idx].size *= blocks;
+		wrClster(entry,clster);
 	}
 	else {
 		memcpy(clster.data,argv[1],strlen(argv[1]) * sizeof(char));
@@ -343,6 +355,8 @@ int append(uint16_t argc, char **argv) {
 	DataCluster clster;
 	DirEntry file;
 	int i=0, block=9;
+	int idx    = -1;
+	int entry  = -1;
 	int exists = -1;
 	int attrib = -1;
 
@@ -350,7 +364,7 @@ int append(uint16_t argc, char **argv) {
 
 	while (path[i] != NULL) {
 		clster = rdClster(block);
-		file   = getentry(clster,path[i]);
+		file   = getentry(clster,path[i],&idx);
 		exists = file.firstblock;
 		attrib = file.attributes;
 
@@ -358,7 +372,11 @@ int append(uint16_t argc, char **argv) {
 			free(path);
 			erro(ENOENT);
 			return -1;
-		} else block = exists;
+		}
+		else {
+			entry = block;
+			block = exists;
+		}
 		i++;
 	}
 
@@ -396,8 +414,13 @@ int append(uint16_t argc, char **argv) {
 		}
 		gFat[last] = 0xFFFF;
 		writeFAT();
+
+		clster = rdClster(entry);
+		clster.dir[idx].size += (blocks * CLUSTER);
+		wrClster(entry,clster);
 	}
 	else {
+		memset(clster.data,0,CLUSTER * sizeof(char));
 		memcpy(clster.data,buffer,strlen(buffer) * sizeof(char));
 		wrClster(block,clster);
 	}
@@ -418,6 +441,7 @@ int read(uint16_t argc, char **argv) {
 	DataCluster clster;
 	DirEntry file;
 	int i=0, block=9;
+	int idx    = -1;
 	int exists = -1;
 	int attrib = -1;
 
@@ -426,7 +450,7 @@ int read(uint16_t argc, char **argv) {
 
 	while (path[i] != NULL) {
 		clster = rdClster(block);
-		file   = getentry(clster,path[i]);
+		file   = getentry(clster,path[i],&idx);
 		exists = file.firstblock;
 		attrib = file.attributes;
 

@@ -19,13 +19,15 @@ DirEntry newentry(char *filename, uint8_t attr) {
 	return entry;
 }
 
-DirEntry getentry(DataCluster cluster, char *path) {
+DirEntry getentry(DataCluster cluster, char *path, int *idx) {
 	DirEntry entry = { 0 };
 	char *filename = NULL;
 	for (size_t i=0; i < ENTRYBYCLUSTER; i++) {
 		filename = (char*)cluster.dir[i].filename;
-		if (strcmp(path,filename) == 0)
-			entry = cluster.dir[i];
+		if (strcmp(path,filename) == 0) {
+			(*idx) = i;
+			entry  = cluster.dir[i];
+		}
 	}
 	return entry;
 }

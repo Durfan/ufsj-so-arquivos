@@ -3,7 +3,7 @@
 
 DataCluster crtdir(DataCluster cluster, DirEntry folder);
 DirEntry newentry(char *filename, uint8_t attr);
-DirEntry getentry(DataCluster cluster, char *path);
+DirEntry getentry(DataCluster cluster, char *path, int *idx);
 void prtls(DataCluster cluster, char *path, int block);
 
 int maxdname(char **path);
