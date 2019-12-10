@@ -216,7 +216,7 @@ int unlink(uint16_t argc, char **argv) {
 	}
 
 	DirEntry folder;
-	DataCluster cluster;
+	DataCluster cluster, empty;
 	int idx = -1;
 	int i=0, block=9, last = 9;
 	int exists = -1;
@@ -239,6 +239,17 @@ int unlink(uint16_t argc, char **argv) {
 		i++;
 	}
 
+	DirEntry entry = { 0 };
+	empty = rdClster((int)folder.firstblock);
+	for(long unsigned int j=0; j < ENTRYBYCLUSTER; j++) {
+		if(memcmp(empty.dir+j, &entry, sizeof(DirEntry))) {
+			if(folder.attributes == 1) {
+				printf("Diretório não vazio.\n");
+				return -1;
+			}
+		}
+	}
+	
 	i = block;
 	if (gFat[i] != 0xFFFF) {
 		while (gFat[i] != 0xFFFF) {
@@ -252,9 +263,10 @@ int unlink(uint16_t argc, char **argv) {
 		memset(cluster.data, 0x00, sizeof(cluster.data));
 		wrClster(i,cluster);
 		gFat[i] = 0x00;
+		cluster = rdClster(last);
 	}
-	cluster = rdClster(block);
-	memset(cluster.dir,0x00,sizeof(cluster.dir));
+
+	memset(cluster.dir+idx,0x00,sizeof(DirEntry));
 	gFat[block] = 0x00;
 
 	wrClster(last,cluster);
