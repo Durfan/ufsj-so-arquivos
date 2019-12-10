@@ -416,7 +416,7 @@ int append(uint16_t argc, char **argv) {
 		writeFAT();
 
 		clster = rdClster(entry);
-		clster.dir[idx].size += (blocks * CLUSTER);
+		clster.dir[idx].size += ((blocks-1) * CLUSTER);
 		wrClster(entry,clster);
 	}
 	else {
