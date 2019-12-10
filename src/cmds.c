@@ -203,10 +203,64 @@ int create(uint16_t argc, char **argv) {
 	return 0;
 }
 
-/* int unlink(uint16_t argc, char **argv) {
+int unlink(uint16_t argc, char **argv) {
 
+	if (isLoaded() == 0) {
+		erro(ENXIO);
+		return -1;
+	} else if (argc != 2) {
+		erro(EINVAL);
+		return -1;
+	}
+
+	DirEntry folder;
+	DataCluster cluster;
+	int i=0, block=9, last = 9;;
+	int exists = -1;
+
+	char **path = tkenizer(argv[1],"/");
+
+	while (path[i] != NULL) {
+		cluster = rdClster(block);
+		folder = getentry(cluster,path[i]);
+		exists = folder.firstblock;
+
+		if (exists == 0) {
+			free(path);
+			erro(ENOENT);
+			return -1;
+		} else{
+			last = block;
+			block = exists;
+		}
+		i++;
+	}
+
+
+	i = block;
+	if(gFat[i] != 0xFFFF){
+		while(gFat[i] != 0xFFFF){
+			cluster = rdClster((int)gFat[i]-1);
+			memset(cluster.data, 0x00, sizeof(cluster.data));
+			wrClster(i,cluster);
+			gFat[i] = 0x00;
+			i++;
+		}
+		cluster = rdClster((int)gFat[i]-1);
+		memset(cluster.data, 0x00, sizeof(cluster.data));
+		wrClster(i,cluster);
+		gFat[i] = 0x00;
+	}
+	cluster = rdClster(block);
+	memset(cluster.dir,0x00,sizeof(cluster.dir));
+	gFat[block] = 0x00;
+
+	wrClster(last,cluster);
+	writeFAT();
+
+	free(path);
 	return 0;
-} */
+}
 
 int write(uint16_t argc, char **argv) {
 	if (isLoaded() == 0) {

@@ -124,7 +124,7 @@ int commands(char *cmd) {
 	case LS:     status =     ls(argc,argv); break;
 	case MKDIR:  status =  mkdir(argc,argv); break;
 	case CREATE: status = create(argc,argv); break;
-	//case UNLINK: status = unlink(argc,argv); break;
+	case UNLINK: status = unlink(argc,argv); break;
 	case WRITE:  status =  write(argc,argv); break;
 	case APPEND: status = append(argc,argv); break;
 	case READ:   status =   read(argc,argv); break;
