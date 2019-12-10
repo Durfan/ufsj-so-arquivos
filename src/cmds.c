@@ -277,12 +277,80 @@ int write(uint16_t argc, char **argv) {
 	return 0;
 }
 
-/*
 int append(uint16_t argc, char **argv) {
+	if (isLoaded() == 0) {
+		erro(ENXIO);
+		return -1;
+	} else if (argc != 3) {
+		erro(EINVAL);
+		return -1;
+	}
 
+	DataCluster clster;
+	DirEntry file;
+	int i=0, block=9;
+	int exists = -1;
+	int attrib = -1;
+
+	char **path = tkenizer(argv[2],"/");
+
+	while (path[i] != NULL) {
+		clster = rdClster(block);
+		file   = getentry(clster,path[i]);
+		exists = file.firstblock;
+		attrib = file.attributes;
+
+		if (exists == 0) {
+			free(path);
+			erro(ENOENT);
+			return -1;
+		} else block = exists;
+		i++;
+	}
+
+	if (attrib != 0) {
+		free(path);
+		erro(EISDIR);
+		return -1;
+	}
+
+	int last;
+	while (block != 0xFFFF) {
+		last = block;
+		block = gFat[block];
+	}
+
+	block  = last;
+	clster = rdClster(last);
+
+	char buffer[8192] = { 0 };
+	memcpy(buffer,clster.data,strlen(argv[1]) * sizeof(char));
+	strncat(buffer,argv[1],strlen(argv[1]) * sizeof(char));
+
+	int blocks = strlen(buffer) / CLUSTER;
+	if (strlen(buffer) % (CLUSTER) != 0) blocks+=1;
+
+	if (blocks > 1) {
+		for (int i=0; i < blocks; i++) {
+			strncpy((char*)clster.data,&buffer[i*CLUSTER],CLUSTER);
+			wrClster(block,clster);
+			last = block;
+			gFat[block] = 0xFFFF;
+			gFat[block] = freeAddr();
+			block = gFat[block];
+			clster = rdClster(block);
+		}
+		gFat[last] = 0xFFFF;
+		writeFAT();
+	}
+	else {
+		memcpy(clster.data,buffer,strlen(buffer) * sizeof(char));
+		wrClster(block,clster);
+	}
+
+	free(path);
 	return 0;
 }
-*/
 
 int read(uint16_t argc, char **argv) {
 	if (isLoaded() == 0) {
