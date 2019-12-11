@@ -3,8 +3,8 @@
 
 extern char *program_invocation_name;
 extern char *program_invocation_short_name;
-#define VERSION "0.5.5"
-#define TAG "beta"
+#define VERSION "0.8.1"
+#define TAG "release"
 
 #define CRED "\x1b[31m"
 #define CYEL "\x1b[33m"
