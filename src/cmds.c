@@ -260,7 +260,7 @@ int unlink(uint16_t argc, char **argv) {
 	} else if (attrib == 1) {
 
 		clster = rdClster(block);
-		int empty = strnlen((char*)clster.data,CLUSTER * sizeof(char));
+		int empty = strnlen((char*)clster.data,CLUSTER);
 		if (empty != 0) {
 			free(path);
 			erro(ENOTEMPTY);
@@ -354,7 +354,7 @@ int write(uint16_t argc, char **argv) {
 		wrClster(entry,clster);
 	}
 	else {
-		memcpy(clster.data,argv[1],strlen(argv[1]) * sizeof(char));
+		memcpy(clster.data,argv[1],strlen(argv[1]));
 		wrClster(block,clster);
 	}
 
@@ -415,11 +415,13 @@ int append(uint16_t argc, char **argv) {
 	clster = rdClster(last);
 
 	char buffer[8192] = { 0 };
-	memcpy(buffer,clster.data,strlen(argv[1]) * sizeof(char));
-	strncat(buffer,argv[1],strlen(argv[1]) * sizeof(char));
+	size_t len = strnlen((char*)clster.data,CLUSTER);
+	memcpy(buffer,clster.data,len);
+	strncat(buffer,argv[1],strlen(argv[1]));
 
 	int blocks = strlen(buffer) / CLUSTER;
-	if (strlen(buffer) % (CLUSTER) != 0) blocks+=1;
+	if (strlen(buffer) % CLUSTER != 0)
+		blocks+=1;
 
 	if (blocks > 1) {
 		for (int i=0; i < blocks; i++) {
@@ -439,8 +441,8 @@ int append(uint16_t argc, char **argv) {
 		wrClster(entry,clster);
 	}
 	else {
-		memset(clster.data,0,CLUSTER * sizeof(char));
-		memcpy(clster.data,buffer,strlen(buffer) * sizeof(char));
+		memset(clster.data,0x00,CLUSTER);
+		memcpy(clster.data,buffer,strlen(buffer));
 		wrClster(block,clster);
 	}
 
@@ -488,10 +490,19 @@ int read(uint16_t argc, char **argv) {
 		return -1;
 	}
 
+	clster = rdClster(block);
+	int empty = strnlen((char*)clster.data,CLUSTER);
+	if (empty == 0) {
+		free(argv1);
+		free(path);
+		erro(EISNAM);
+		return 0;
+	}
+
 	int size = 0;
 	do {
 		clster = rdClster(block);
-		printf("%s", clster.data);
+		fwrite(clster.data,sizeof(char),CLUSTER,stdout);
 		block = gFat[block];
 		size += CLUSTER;
 	} while (block != 0xFFFF);

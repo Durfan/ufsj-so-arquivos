@@ -37,14 +37,22 @@ void prtls(DataCluster cluster, char *path, int block) {
 	printf("\u250C 0x%04X "BOLD"%s\n"NORM, block, path);
 	for (size_t i=0; i < ENTRYBYCLUSTER; i++) {
 		if (cluster.dir[i].filename[0] != 0x0000) {
+			if (cluster.dir[i].attributes == 1) {
+				printf("\u251C\u2574 0x%04X ", cluster.dir[i].firstblock);
+				printf("%dB ", cluster.dir[i].size);
+				printf(BOLD"%s\n"NORM, cluster.dir[i].filename);
+			}
 			space++;
-			printf("\u251C\u2574 0x%04X ", cluster.dir[i].firstblock);
-			printf("%dB ", cluster.dir[i].size);
-			if (cluster.dir[i].attributes == 1)
-				printf(BOLD"%s"NORM, cluster.dir[i].filename);
-			else 
-				printf("%s", cluster.dir[i].filename);
-			putchar(0x0A);
+		}
+	}
+	for (size_t i=0; i < ENTRYBYCLUSTER; i++) {
+		if (cluster.dir[i].filename[0] != 0x0000) {
+			if (cluster.dir[i].attributes == 0) {
+				printf("\u251C\u2574 0x%04X ", cluster.dir[i].firstblock);
+				printf("%dB ", cluster.dir[i].size);
+				printf("%s\n", cluster.dir[i].filename);
+			}
+			space++;
 		}
 	}
 	printf("\u2514 cap: %d/32\n", space);

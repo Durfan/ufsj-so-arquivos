@@ -107,6 +107,11 @@ char **tkenizer(char *input, char *delim) {
 }
 
 int commands(char *cmd) {
+	if (strlen(cmd) >= 4096) {
+		erro(ENOBUFS);
+		return -1;
+	}
+
 	int status = 0;
 	uint16_t argc = 0;
 	char **argv = cmdparse(&argc,cmd);
