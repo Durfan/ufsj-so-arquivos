@@ -1,9 +1,17 @@
 #include "main.h"
 
 DataCluster crtdir(DataCluster cluster, DirEntry entry) {
-	int i = 0;
-	while (cluster.dir[i].filename[0] != 0) i++;
-	cluster.dir[i] = entry;
+	size_t i,len;
+	bool free = false;
+	for (i=0; i < ENTRYBYCLUSTER; i++) {
+		len = strnlen((char*)cluster.dir[i].filename,18);
+		if (!free && len == 0) {
+			free = !free;
+			cluster.dir[i] = entry;
+		}
+	}
+	if (!free)
+		erro(EUCLEAN);
 	return cluster;
 }
 
@@ -41,8 +49,8 @@ void prtls(DataCluster cluster, char *path, int block) {
 				printf("\u251C\u2574 0x%04X ", cluster.dir[i].firstblock);
 				printf("%dB ", cluster.dir[i].size);
 				printf(BOLD"%s\n"NORM, cluster.dir[i].filename);
+				space++;
 			}
-			space++;
 		}
 	}
 	for (size_t i=0; i < ENTRYBYCLUSTER; i++) {
@@ -51,8 +59,8 @@ void prtls(DataCluster cluster, char *path, int block) {
 				printf("\u251C\u2574 0x%04X ", cluster.dir[i].firstblock);
 				printf("%dB ", cluster.dir[i].size);
 				printf("%s\n", cluster.dir[i].filename);
+				space++;
 			}
-			space++;
 		}
 	}
 	printf("\u2514 cap: %d/32\n", space);

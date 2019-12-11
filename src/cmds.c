@@ -485,6 +485,7 @@ int read(uint16_t argc, char **argv) {
 	}
 
 	if (attrib != 0) {
+		free(argv1);
 		free(path);
 		erro(EISDIR);
 		return -1;
