@@ -165,6 +165,7 @@ int cmderr(char *cmd) {
 }
 
 void shsair(void) {
+	fatimg();
 	puts("Saindo...");
 }
 

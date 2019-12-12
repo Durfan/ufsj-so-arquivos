@@ -36,5 +36,7 @@ void rmClster(int index);
 void writeFAT(void);
 int  freeAddr(void);
 
+void fatimg(void);
+
 //#pragma message __FILE__
 #endif // INCLUDE_FAT_H

@@ -62,3 +62,35 @@ int freeAddr(void) {
 		return -1;
 	return i;
 }
+
+void fatimg(void) {
+	char output[0x100];
+	strcpy(output,FATNAME);
+	strcat(output,".PPM");
+
+	FILE *fp = fopen(output,"w+");
+	if (fp == NULL) {
+		perror(program_invocation_short_name);
+		return;
+	}
+
+	fprintf(fp, "P3\n");
+	fprintf(fp, "128 32\n");
+	fprintf(fp, "255\n");
+
+	for (int i=0; i < NUMCLUSTERS; i++) {
+		if (gFat[i] == 0xfffd)
+			fprintf(fp, "0 0 0");
+		else if (gFat[i] == 0xfffe)
+			fprintf(fp, "255 255 0");
+		else if (gFat[i] == 0xffff)
+			fprintf(fp, "0 0 255");
+		else if (gFat[i] >= 0x0001 && gFat[i] <= 0xfffc)
+			fprintf(fp, "0 255 0");
+		else if (gFat[i] == 0x0000)
+			fprintf(fp, "255 255 255");
+		fprintf(fp, " ");
+	}
+
+	fclose(fp);
+}
