@@ -165,8 +165,12 @@ int cmderr(char *cmd) {
 }
 
 void shsair(void) {
+	if (isLoaded() == 0) {
+		puts("Saindo...");
+		return;
+	}
+	printf("Salvando '%s' fragmentation image...\n",FATNAME);
 	fatimg();
-	puts("Saindo...");
 }
 
 void dbgtokn(char **tokens) {

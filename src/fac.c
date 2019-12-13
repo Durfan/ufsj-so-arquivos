@@ -88,7 +88,7 @@ void fatimg(void) {
 		else if (gFat[i] >= 0x0001 && gFat[i] <= 0xfffc)
 			fprintf(fp, "0 255 0");
 		else if (gFat[i] == 0x0000)
-			fprintf(fp, "255 255 255");
+			fprintf(fp, "220 220 220");
 		fprintf(fp, " ");
 	}
 
